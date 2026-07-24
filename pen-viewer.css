@@ -1,0 +1,25 @@
+:root { color-scheme:dark; --red:#ed2722; --panel:#111519; --line:#343a41; }
+* { box-sizing:border-box; }
+html,body { min-height:100%; }
+body { margin:0; color:#f4f5f1; background:#080a0c; font-family:"Yu Gothic UI","Hiragino Sans",system-ui,sans-serif; }
+.pen-viewer-shell { min-height:100svh; display:grid; grid-template-rows:auto minmax(360px,1fr) auto auto auto; padding:12px; }
+.viewer-toolbar { display:flex; justify-content:space-between; align-items:center; min-height:38px; color:#777e86; font:700 8px/1 ui-monospace,monospace; letter-spacing:.16em; }
+.viewer-toolbar p { margin:0; }
+.viewer-toolbar p span { display:inline-block; width:6px; height:6px; margin-right:7px; border-radius:50%; background:#37d381; }
+.viewer-toolbar strong { color:#cbd0d5; font-size:9px; }
+.pen-canvas-wrap { position:relative; min-height:360px; overflow:hidden; border:1px solid var(--line); background:radial-gradient(circle at 50% 42%,#293139,#101419 56%,#080a0c); touch-action:none; }
+#pen-canvas { display:block; width:100%; height:100%; cursor:grab; }
+#pen-canvas:active { cursor:grabbing; }
+.loading { position:absolute; top:50%; left:50%; margin:0; color:#858c94; font-size:12px; transform:translate(-50%,-50%); }
+.loading.hidden { display:none; }
+.drag-help { position:absolute; bottom:9px; left:50%; margin:0; color:#757c84; font-size:9px; letter-spacing:.08em; transform:translateX(-50%); pointer-events:none; }
+.pen-controls { display:grid; grid-template-columns:44px 1fr 44px; gap:7px; margin-top:8px; }
+button { min-height:42px; border:1px solid var(--line); border-radius:0; color:#f2f3ef; background:var(--panel); font:inherit; font-size:11px; font-weight:800; cursor:pointer; }
+button:hover,button:focus-visible { border-color:var(--red); outline:none; }
+.lever-legend { display:flex; justify-content:center; align-items:center; gap:16px; min-height:38px; color:#9aa1a8; font-size:9px; font-weight:800; }
+.lever-legend span { display:flex; align-items:center; gap:5px; }
+.clip-mark { padding:3px 7px; border:1px solid #626970; color:#c5c9ce; font:700 7px/1 ui-monospace,monospace; letter-spacing:.1em; }
+.model-downloads { display:flex; justify-self:end; gap:12px; }
+.model-downloads a { color:#7f878f; font-size:9px; text-decoration:none; }
+.model-downloads a:hover,.model-downloads a:focus-visible { color:#fff; outline:none; }
+@media(max-width:520px){.pen-viewer-shell{grid-template-rows:auto minmax(310px,1fr) auto auto auto}.pen-canvas-wrap{min-height:310px}.pen-controls{grid-template-columns:42px 1fr 42px}.lever-legend{gap:8px;font-size:8px}}

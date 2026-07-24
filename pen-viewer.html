@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>壊れた3色ボールペン 3Dビューア</title>
+  <link rel="stylesheet" href="pen-viewer.css">
+</head>
+<body>
+  <main class="pen-viewer-shell">
+    <div class="viewer-toolbar">
+      <p><span></span> THREE-COLOR PEN / 3D</p>
+      <strong id="view-label">全体</strong>
+    </div>
+    <div class="pen-canvas-wrap">
+      <canvas id="pen-canvas" aria-label="回転可能な壊れた3色ボールペンの3Dモデル"></canvas>
+      <p class="loading" id="loading">3Dモデルを準備中…</p>
+      <p class="drag-help">上下左右にドラッグ／スワイプして360°回転</p>
+    </div>
+    <nav class="pen-controls" aria-label="3D表示操作">
+      <button type="button" id="zoom-out" aria-label="縮小">−</button>
+      <button type="button" id="reset-view">全体を見る</button>
+      <button type="button" id="zoom-in" aria-label="拡大">＋</button>
+    </nav>
+    <div class="lever-legend" aria-label="後端から見たレバーの配置">
+      <span class="clip-mark">CLIP</span>
+      <span>0°</span><span>赤 45°</span><span>青 180°</span><span>黒 325°</span>
+    </div>
+    <div class="model-downloads"><a href="assets/models/three-color-pen.glb" download>GLB</a><a href="assets/models/three-color-pen.blend" download>BLEND</a></div>
+  </main>
+  <script src="pen-viewer.js"></script>
+</body>
+</html>

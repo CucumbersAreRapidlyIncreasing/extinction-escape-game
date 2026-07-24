@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080a0c">
+  <meta name="description" content="謎解きゲーム『絶滅迫る地球からの脱出』電源復旧資料">
+  <title>電源復旧｜絶滅迫る地球からの脱出</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="progress.css">
+  <link rel="stylesheet" href="screen3.css">
+  <link rel="stylesheet" href="screen4.css">
+  <link rel="stylesheet" href="annotation.css">
+</head>
+<body class="screen4-page" data-screen-context="power-restoration" data-game-screen="4">
+  <a class="skip-link" href="#power-documents">電源復旧資料へ移動</a>
+
+  <header class="screen4-nav">
+    <a href="screen3.html" aria-label="STEP 1へ戻る">← <span>STEP 01</span></a>
+    <p>MISSION ARCHIVE / POWER RESTORATION</p>
+    <span><i></i> FILES RECOVERED</span>
+  </header>
+
+  <main>
+    <section class="screen4-hero">
+      <div class="screen4-grid" aria-hidden="true"></div>
+      <div class="screen4-hero-inner reveal">
+        <p class="section-kicker">RECOVERED DOCUMENTS / STEP 02</p>
+        <p class="screen4-step">MISSION <strong>02</strong></p>
+        <h1>電源復旧<br>手順を解読せよ</h1>
+        <p>鍵のかかった封筒には、宇宙船の電源を再起動するための資料が入っていた。<br>汚損した手順と残されたメモから、5つのダイヤルに設定する数字を導き出そう。</p>
+        <a href="#power-documents">資料を確認する <span>↓</span></a>
+      </div>
+      <aside class="power-state reveal" aria-label="隕石衝突まで40分">
+        <span>隕石衝突まで</span>
+        <strong>40分</strong>
+        <div><i></i></div>
+        <small>電源復旧を急いでください</small>
+      </aside>
+    </section>
+
+    <section class="power-documents" id="power-documents" aria-labelledby="documents-title">
+      <header class="power-documents-heading section-shell reveal">
+        <div>
+          <p class="section-kicker">ENCLOSED FILES / 02</p>
+          <h2 id="documents-title">封筒の中身</h2>
+        </div>
+        <p>画像をクリック／タップすると<br>大きく表示できます</p>
+      </header>
+
+      <div class="document-stack section-shell">
+        <article class="document-card reveal">
+          <header><span>DOCUMENT / 01</span><strong>電源復旧メモ</strong></header>
+          <button class="document-image" type="button" data-lightbox-src="assets/screen4/images/power-restoration-memo.png" data-lightbox-label="電源復旧メモ">
+            <img src="assets/screen4/images/power-restoration-memo.png" alt="コーヒーで汚れた電源復旧手順を補うために残されたメモ" loading="lazy">
+            <span>拡大表示</span>
+          </button>
+          
+        </article>
+
+        <article class="document-card reveal">
+          <header><span>DOCUMENT / 02</span><strong>電源起動手順</strong></header>
+          <button class="document-image" type="button" data-lightbox-src="assets/screen4/images/power-startup-procedure.png" data-lightbox-label="電源起動手順">
+            <img src="assets/screen4/images/power-startup-procedure.png" alt="コーヒーで一部が読めなくなったAからEの電源起動ダイヤル手順" loading="lazy">
+            <span>拡大表示</span>
+          </button>
+          
+        </article>
+      </div>
+    </section>
+
+    <section class="control-room-gate" aria-labelledby="control-room-gate-title">
+      <div class="control-room-gate-inner reveal">
+        <p>POWER RESTORATION REQUIRED</p>
+        <h2 id="control-room-gate-title">宇宙船の電源を復旧させるために<br>コントロールルームで必要な操作を実行しよう</h2>
+        <a href="control-room.html"><span>コントロールルームへ向かう</span><i aria-hidden="true">→</i></a>
+      </div>
+    </section>
+  </main>
+
+  <button class="inventory-launch" id="inventory-open" type="button" aria-haspopup="dialog" aria-controls="inventory-layer">
+    <span class="case-icon" aria-hidden="true">▦</span><span>備品ケース</span><i aria-hidden="true">02</i>
+  </button>
+  <button class="robot-launch" type="button" aria-haspopup="dialog" aria-controls="robot-chat" aria-label="ロボに話しかける" data-open-robot>
+    <span class="robot-face" aria-hidden="true"></span><i aria-hidden="true"></i>
+  </button>
+
+  <section class="modal-layer" id="inventory-layer" hidden>
+    <button class="modal-backdrop" type="button" data-close-inventory aria-label="備品ケースを閉じる"></button>
+    <div class="inventory-window" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
+      <header class="window-header">
+        <div><span>EQUIPMENT STORAGE</span><h2 id="inventory-title">備品ケース</h2></div>
+        <button type="button" class="window-close" data-close-inventory aria-label="閉じる">×</button>
+      </header>
+      <div class="inventory-list" id="inventory-list">
+        <p class="inventory-count">保管中の備品 <strong>2</strong></p>
+        <div class="inventory-grid">
+          <button class="inventory-item" type="button" data-open-detail="inventory-detail">
+            <span class="item-preview" aria-hidden="true"></span><span class="item-copy"><small>ITEM 01</small><strong>謎の<br>ブロック</strong><i>詳しく見る →</i></span>
+          </button>
+          <button class="inventory-item" type="button" data-open-detail="pen-detail">
+            <span class="item-preview item-preview-pen" aria-hidden="true"></span><span class="item-copy"><small>ITEM 02</small><strong>壊れた3色<br>ボールペン</strong><i>詳しく見る →</i></span>
+          </button>
+          <div class="inventory-slot" aria-hidden="true"><span>EMPTY</span></div>
+        </div>
+      </div>
+      <div class="inventory-detail" id="inventory-detail" hidden>
+        <button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button>
+        <div class="detail-title"><span>ITEM 01</span><h3>謎のブロック</h3><p>ドラッグまたはスワイプして、各面を確認できます。</p></div>
+        <iframe src="prototype-3d.html" title="謎のブロックの3D表示" loading="lazy"></iframe>
+      </div>
+      <div class="inventory-detail" id="pen-detail" hidden>
+        <button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button>
+        <div class="detail-title"><span>ITEM 02</span><h3>壊れた3色ボールペン</h3><p>回転して、後端に配置された赤・青・黒のレバーを観察できます。</p></div>
+        <iframe src="pen-viewer.html" title="壊れた3色ボールペンの3D表示" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <aside class="robot-chat" id="robot-chat" role="dialog" aria-modal="false" aria-labelledby="robot-chat-title" hidden>
+    <header class="chat-header">
+      <span class="chat-face" aria-hidden="true"></span>
+      <div><small>ASSISTANT / POWER RESTORATION</small><h2 id="robot-chat-title">ロボ</h2></div>
+      <span class="online-status">ONLINE</span>
+      <button type="button" id="robot-chat-close" aria-label="チャットを閉じる">×</button>
+    </header>
+    <div class="chat-history" id="chat-history" aria-live="polite">
+      <div class="chat-message chat-message-robot"><span>ROBO</span><p>なにか御用ですか？</p></div>
+    </div>
+    <form class="chat-form" id="chat-form">
+      <label for="chat-input">ロボに伝える言葉</label>
+      <div><input id="chat-input" name="message" type="text" autocomplete="off" enterkeyhint="send" placeholder="言葉を入力してください"><button type="submit" aria-label="送信">→</button></div>
+    </form>
+  </aside>
+
+  <section class="image-lightbox" id="image-lightbox" hidden>
+    <button class="lightbox-backdrop" type="button" data-close-lightbox aria-label="拡大表示を閉じる"></button>
+    <div class="lightbox-window" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+      <header><h2 id="lightbox-title">資料</h2><button type="button" data-close-lightbox aria-label="閉じる">×</button></header>
+      <div class="lightbox-scroll"><img id="lightbox-image" src="" alt=""></div>
+    </div>
+  </section>
+
+  <footer><p>EXTINCTION ESCAPE PROJECT</p><span>STEP 02 / POWER RESTORATION</span></footer>
+  <script src="progress.js"></script>
+  <script src="app.js"></script>
+  <script src="screen4.js"></script>
+  <script src="annotation.js"></script>
+</body>
+</html>

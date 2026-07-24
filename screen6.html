@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#080a0c">
+  <meta name="description" content="謎解きゲーム『絶滅迫る地球からの脱出』タイムマシン起動テスト">
+  <title>タイムマシン｜絶滅迫る地球からの脱出</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="progress.css"><link rel="stylesheet" href="screen3.css"><link rel="stylesheet" href="screen6.css"><link rel="stylesheet" href="annotation.css">
+</head>
+<body class="screen6-page" data-screen-context="time-machine" data-game-screen="6">
+  <a class="skip-link" href="#time-machine-documents">タイムマシン資料へ移動</a>
+  <header class="screen6-nav"><a href="screen5.html" aria-label="エンジン起動画面へ戻る">← <span>ENGINE STARTUP</span></a><p>MISSION ARCHIVE / TIME MACHINE</p><span><i></i> ENGINE ONLINE</span></header>
+  <main>
+    <section class="screen6-hero">
+      <div class="screen6-grid" aria-hidden="true"></div>
+      <div class="screen6-hero-inner reveal"><p class="section-kicker">TIME MACHINE / STEP 04</p><p class="screen6-step">MISSION <strong>04</strong></p><h1>未来へ帰る<br>方法を探せ</h1>
+        <div class="time-story"><p>無事に電源を復旧させ、エンジンシステムを起動することができた。</p><p>あとは未来に帰るために、タイムマシンの起動方法を調べなければならない。</p></div>
+        <a href="#time-machine-documents">資料を確認する <span>↓</span></a>
+      </div>
+      <aside class="time-state reveal" aria-label="隕石衝突まで20分"><span>隕石衝突まで</span><strong>20分</strong><div><i></i></div><small>タイムマシンの準備を急いでください</small></aside>
+    </section>
+
+    <section class="time-documents" id="time-machine-documents" aria-labelledby="time-documents-title">
+      <header class="time-documents-heading section-shell reveal"><div><p class="section-kicker">RECOVERED FILES / 02</p><h2 id="time-documents-title">タイムマシン資料</h2></div><p>画像をクリック／タップすると<br>大きく表示できます</p></header>
+      <div class="time-document-grid section-shell">
+        <article class="time-document reveal"><header><span>DOCUMENT / 01</span><strong>タイムマシン起動方法</strong></header><button class="time-document-image" type="button" data-lightbox-src="assets/screen6/images/time-machine-procedure.png" data-lightbox-label="タイムマシン起動方法"><img src="assets/screen6/images/time-machine-procedure.png" alt="タイムマシンの装着、移動時間の指定、色レバーの操作と暗号表の解読方法を記した起動方法" loading="lazy"><span>拡大表示</span></button></article>
+        <article class="time-document reveal"><header><span>DOCUMENT / 02</span><strong>タイムマシン解説書</strong></header><button class="time-document-image" type="button" data-lightbox-src="assets/screen6/images/time-machine-guide.png" data-lightbox-label="タイムマシン解説書"><img src="assets/screen6/images/time-machine-guide.png" alt="宇宙船搭載タイムマシンの機能と各世代の最大移動時間を説明する解説書" loading="lazy"><span>拡大表示</span></button></article>
+      </div>
+    </section>
+
+    <section class="time-room-gate" aria-labelledby="time-room-gate-title"><div class="time-room-gate-inner reveal"><p>SEQUENCE TEST REQUIRED</p><h2 id="time-room-gate-title">タイムマシンの起動手順を<br>コントロールルームでテストしよう</h2><a href="time-machine-control-room.html"><span>コントロールルームへ移動する</span><i aria-hidden="true">→</i></a></div></section>
+  </main>
+
+  <button class="inventory-launch" id="inventory-open" type="button" aria-haspopup="dialog" aria-controls="inventory-layer"><span class="case-icon" aria-hidden="true">▦</span><span>備品ケース</span><i aria-hidden="true">03</i></button>
+  <button class="robot-launch" type="button" aria-haspopup="dialog" aria-controls="robot-chat" aria-label="ロボに話しかける" data-open-robot><span class="robot-face" aria-hidden="true"></span><i aria-hidden="true"></i></button>
+  <section class="modal-layer" id="inventory-layer" hidden>
+    <button class="modal-backdrop" type="button" data-close-inventory aria-label="備品ケースを閉じる"></button>
+    <div class="inventory-window" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
+      <header class="window-header"><div><span>EQUIPMENT STORAGE</span><h2 id="inventory-title">備品ケース</h2></div><button type="button" class="window-close" data-close-inventory aria-label="閉じる">×</button></header>
+      <div class="inventory-list" id="inventory-list"><p class="inventory-count">保管中の備品 <strong id="inventory-count">2</strong></p><div class="inventory-grid">
+        <button class="inventory-item" type="button" data-open-detail="inventory-detail"><span class="item-preview" aria-hidden="true"></span><span class="item-copy"><small>ITEM 01</small><strong>謎の<br>ブロック</strong><i>詳しく見る →</i></span></button>
+        <button class="inventory-item" type="button" data-open-detail="pen-detail"><span class="item-preview item-preview-pen" aria-hidden="true"></span><span class="item-copy"><small>ITEM 02</small><strong>壊れた3色<br>ボールペン</strong><i>詳しく見る →</i></span></button>
+        <button class="inventory-item cipher-item" id="cipher-item" type="button" data-open-detail="cipher-detail" hidden><span class="item-preview item-preview-cipher" aria-hidden="true">暗号表</span><span class="item-copy"><small>ITEM 03</small><strong>暗号表</strong><i>詳しく見る →</i></span></button>
+        <div class="inventory-slot" id="inventory-empty-slot" aria-hidden="true"><span>EMPTY</span></div>
+      </div></div>
+      <div class="inventory-detail" id="inventory-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 01</span><h3>謎のブロック</h3><p>ドラッグまたはスワイプして、各面を確認できます。</p></div><iframe src="prototype-3d.html" title="謎のブロックの3D表示" loading="lazy"></iframe></div>
+      <div class="inventory-detail" id="pen-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 02</span><h3>壊れた3色ボールペン</h3><p>回転して、後端に配置された赤・青・黒のレバーを観察できます。</p></div><iframe src="pen-viewer.html" title="壊れた3色ボールペンの3D表示" loading="lazy"></iframe></div>
+      <div class="inventory-detail cipher-detail" id="cipher-detail" hidden>
+        <button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 03</span><h3>暗号表</h3><p>7×7のマスを使って、機器名やシステム名を解読します。</p></div>
+        <div class="cipher-overview" id="cipher-overview"><button type="button" data-lightbox-src="assets/screen6/images/cipher-table.png" data-lightbox-label="暗号表"><img src="assets/screen6/images/cipher-table.png" alt="カタカナが7行7列に並んだ暗号表"><span>拡大表示</span></button></div>
+        <button class="combine-open" id="combine-open" type="button">他のアイテムと使用する <span>＋</span></button>
+        <section class="combine-chooser" id="combine-chooser" hidden aria-labelledby="combine-title"><header><small>SELECT EQUIPMENT</small><h4 id="combine-title">一緒に使用するアイテムを選択</h4></header><div><button type="button" data-combine-item="box"><span class="combine-box-icon" aria-hidden="true">▲</span><strong>謎のブロック</strong></button><button type="button" data-combine-item="pen"><span class="combine-pen-icon" aria-hidden="true"></span><strong>壊れた3色ボールペン</strong></button></div><p id="combine-feedback" aria-live="polite"></p></section>
+        <section class="cipher-workbench" id="cipher-workbench" hidden aria-label="暗号表と謎のブロック"><div class="workbench-heading"><div><small>ITEMS COMBINED</small><h4>暗号表 × 謎のブロック</h4></div><div class="workbench-actions"><button id="cube-reset" type="button">初期配置に戻す</button><button id="combine-cancel" type="button">組み合わせを解除</button></div></div><p>ブロックをドラッグして開始マスを決め、方向ボタンで1マスずつ転がしてください。</p>
+          <div class="cipher-grid-wrap"><div class="cipher-grid" id="cipher-grid"><span>イ</span><span>ゼ</span><span>ル</span><span>ダ</span><span>ン</span><span>リ</span><span>メ</span><span>ン</span><span>シ</span><span>カ</span><span>セ</span><span>ス</span><span>タ</span><span>キ</span><span>ヘ</span><span>フ</span><span>サ</span><span>テ</span><span>リ</span><span>モ</span><span>ク</span><span>ア</span><span>ウ</span><span>キ</span><span>ゴ</span><span>ツ</span><span>ベ</span><span>ン</span><span>ケ</span><span>ヲ</span><span>ム</span><span>ロ</span><span>テ</span><span>ミ</span><span>ヨ</span><span>ブ</span><span>ネ</span><span>ニ</span><span>ツ</span><span>ナ</span><span>ハ</span><span>ス</span><span>ラ</span><span>ミ</span><span>ヤ</span><span>ゴ</span><span>パ</span><span>コ</span><span>サ</span><button class="cipher-cube is-yellow" id="cipher-cube" type="button" aria-label="謎のブロック。ドラッグして移動"><i></i></button></div></div>
+          <div class="roll-controls" id="roll-controls"><button type="button" data-roll="up" aria-label="上へ転がす">↑</button><div><button type="button" data-roll="left" aria-label="左へ転がす">←</button><button type="button" data-roll="down" aria-label="下へ転がす">↓</button><button type="button" data-roll="right" aria-label="右へ転がす">→</button></div></div><p class="cube-position" id="cube-position" aria-live="polite"></p>
+        </section>
+      </div>
+    </div>
+  </section>
+  <aside class="robot-chat" id="robot-chat" role="dialog" aria-modal="false" aria-labelledby="robot-chat-title" hidden><header class="chat-header"><span class="chat-face" aria-hidden="true"></span><div><small>ASSISTANT / TIME MACHINE</small><h2 id="robot-chat-title">ロボ</h2></div><span class="online-status">ONLINE</span><button type="button" id="robot-chat-close" aria-label="チャットを閉じる">×</button></header><div class="chat-history" id="chat-history" aria-live="polite"><div class="chat-message chat-message-robot"><span>ROBO</span><p>なにか御用ですか？</p></div></div><form class="chat-form" id="chat-form"><label for="chat-input">ロボに伝える言葉</label><div><input id="chat-input" name="message" type="text" autocomplete="off" enterkeyhint="send" placeholder="言葉を入力してください"><button type="submit" aria-label="送信">→</button></div></form></aside>
+  <section class="image-lightbox" id="image-lightbox" hidden><button class="lightbox-backdrop" type="button" data-close-lightbox aria-label="拡大表示を閉じる"></button><div class="lightbox-window" role="dialog" aria-modal="true" aria-labelledby="lightbox-title"><header><h2 id="lightbox-title">タイムマシン資料</h2><button type="button" data-close-lightbox aria-label="閉じる">×</button></header><div class="lightbox-scroll"><img id="lightbox-image" src="" alt=""></div></div></section>
+  <footer><p>EXTINCTION ESCAPE PROJECT</p><span>STEP 04 / TIME MACHINE</span></footer>
+  <script src="progress.js"></script><script src="app.js"></script><script src="screen6.js"></script><script src="annotation.js"></script>
+</body></html>

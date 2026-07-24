@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070809">
+  <meta name="description" content="ストーリー重視の謎解きゲーム『絶滅迫る地球からの脱出』プロローグ">
+  <title>絶滅迫る地球からの脱出｜プロローグ</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="progress.css">
+</head>
+<body data-game-screen="1">
+  <a class="skip-link" href="#story">ストーリーへ移動</a>
+
+  <header class="hero">
+    <div class="stars stars-a" aria-hidden="true"></div>
+    <div class="stars stars-b" aria-hidden="true"></div>
+    <div class="hero-glow" aria-hidden="true"></div>
+
+    <div class="hero-inner">
+      <p class="system-label"><span></span> MISSION ARCHIVE / FILE 00</p>
+      <div class="title-logo-frame">
+        <img
+          class="title-logo"
+          src="assets/story/title-logo.png"
+          alt="絶滅迫る地球からの脱出"
+          width="2172"
+          height="724"
+        >
+      </div>
+      <div class="hero-rule" aria-hidden="true"><i></i><span>PROLOGUE</span><i></i></div>
+      <p class="hero-copy">月探査ミッションの記録を開示します</p>
+    </div>
+
+    <a class="scroll-cue" href="#story" aria-label="ストーリーを読む">
+      <span>SCROLL</span><i aria-hidden="true"></i>
+    </a>
+  </header>
+
+  <main>
+    <section class="story-section section-shell" id="story" aria-labelledby="story-title">
+      <div class="section-heading reveal">
+        <p class="section-number">01</p>
+        <div>
+          <p class="section-kicker">MISSION BRIEFING</p>
+          <h1 id="story-title">ストーリー</h1>
+        </div>
+      </div>
+
+      <div class="mission-date reveal" aria-label="時代設定 20XX年">
+        <span>YEAR</span>
+        <strong>20XX</strong>
+      </div>
+
+      <div class="story-flow">
+        <article class="story-beat reveal">
+          <span class="beat-index">01</span>
+          <p>月誕生の謎を解明するため<br>探査へ向かうあなた</p>
+        </article>
+
+        <article class="story-beat reveal">
+          <span class="beat-index">02</span>
+          <p>順調な旅になるかと思われた矢先<br>予期せぬトラブルが宇宙船を襲う</p>
+        </article>
+
+        <article class="story-beat story-beat-critical reveal">
+          <span class="beat-index">03</span>
+          <p>なんとか不時着したのもつかの間<br>あなたを待っていたのは<br><em>絶望的な状況</em>だった</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="characters-section" aria-labelledby="characters-title">
+      <div class="section-shell">
+        <div class="section-heading section-heading-light reveal">
+          <p class="section-number">02</p>
+          <div>
+            <p class="section-kicker">PERSONNEL DATA</p>
+            <h2 id="characters-title">登場人物</h2>
+          </div>
+        </div>
+
+        <div class="character-grid">
+          <article class="character-card reveal">
+            <div class="portrait-frame">
+              <img src="assets/story/astronaut.webp" alt="宇宙服を着たあなた" width="1170" height="1131">
+              <span class="portrait-code">CREW / 01</span>
+            </div>
+            <div class="character-copy">
+              <p class="role">PLAYER</p>
+              <h3>あなた</h3>
+              <p>優秀な宇宙飛行士。月への探査の途中でトラブルに巻き込まれた。謎を解かずにはいられない。</p>
+            </div>
+          </article>
+
+          <article class="character-card character-card-robot reveal">
+            <div class="portrait-frame">
+              <img src="assets/story/robot.webp" alt="手を上げるアシスタントロボ" width="1085" height="1256">
+              <span class="portrait-code">SUPPORT / 02</span>
+            </div>
+            <div class="character-copy">
+              <p class="role">ASSISTANT</p>
+              <h3>ロボ</h3>
+              <p>アシスタントロボ。的確な指示があれば、ある程度の行動は行える。気配を消すのが得意。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="notice-section section-shell reveal" aria-labelledby="notice-title">
+      <div class="notice-icon" aria-hidden="true">!</div>
+      <div>
+        <p class="section-kicker">BEFORE YOU START</p>
+        <h2 id="notice-title">注意事項</h2>
+        <p>謎解きに色を使用する場面があります。</p>
+      </div>
+    </section>
+
+    <section class="next-section" aria-label="次の画面へ">
+      <div class="next-inner reveal">
+        <p>MISSION STATUS</p>
+        <h2>準備ができたら<br>物語を始めてください</h2>
+        <a class="next-button" href="screen2.html">
+          <span>次に進む</span>
+          <i aria-hidden="true">→</i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>EXTINCTION ESCAPE PROJECT</p>
+    <span>20XX / LUNAR EXPLORATION MISSION</span>
+  </footer>
+
+  <script src="progress.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

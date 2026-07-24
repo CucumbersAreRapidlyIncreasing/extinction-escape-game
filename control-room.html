@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#040708">
+  <meta name="description" content="宇宙船コントロールルーム 電源復旧操作">
+  <title>コントロールルーム｜絶滅迫る地球からの脱出</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="progress.css">
+  <link rel="stylesheet" href="control-room.css">
+</head>
+<body class="control-room-page" data-game-screen="4">
+  <main class="control-console">
+    <header class="console-header">
+      <div><span>SPACECRAFT MAIN CONTROL</span><h1>コントロールルーム</h1></div>
+      <a href="screen4.html">コントロールルームから出る <i aria-hidden="true">×</i></a>
+    </header>
+
+    <section class="console-status" aria-labelledby="console-title">
+      <div class="console-status-copy">
+        <p>MAIN POWER RESTORATION SEQUENCE</p>
+        <h2 id="console-title">5つのダイヤルを設定せよ</h2>
+        <span>ダイヤルをクリック／タップして1〜6の数字を切り替えてください</span>
+      </div>
+      <div class="system-indicator" id="system-indicator"><i></i><span>SYSTEM OFFLINE</span></div>
+    </section>
+
+    <section class="dial-console" aria-label="電源復旧用5連ダイヤル">
+      <div class="dial-bank" id="dial-bank"></div>
+      <div class="console-readout" aria-live="polite">
+        <span>INPUT SIGNAL</span>
+        <strong id="dial-readout">1 - 1 - 1 - 1 - 1</strong>
+        <p id="control-feedback">正しい起動番号を入力してください</p>
+      </div>
+    </section>
+
+    <section class="power-success" id="power-success" hidden aria-live="assertive">
+      <div class="power-success-icon" aria-hidden="true"><i></i></div>
+      <p>MAIN POWER ONLINE</p>
+      <h2>電源が復旧しました</h2>
+      <a href="screen5.html"><span>次へ進む</span><i aria-hidden="true">→</i></a>
+    </section>
+  </main>
+
+  <script src="progress.js"></script>
+  <script src="control-room.js"></script>
+</body>
+</html>

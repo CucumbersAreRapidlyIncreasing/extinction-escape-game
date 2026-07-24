@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07090c">
+  <meta name="description" content="宇宙船コントロールルーム エンジン起動操作">
+  <title>エンジン制御｜コントロールルーム</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="progress.css">
+  <link rel="stylesheet" href="engine-control-room.css">
+</head>
+<body class="engine-control-page" data-game-screen="5">
+  <main class="engine-console">
+    <header class="engine-console-header">
+      <div><span>PROPULSION CONTROL SYSTEM</span><h1>コントロールルーム</h1></div>
+      <a href="screen5.html">コントロールルームから出る <i aria-hidden="true">×</i></a>
+    </header>
+
+    <section class="engine-console-status" aria-labelledby="engine-console-title">
+      <div><p>ENGINE MANUAL STARTUP</p><h2 id="engine-console-title">同時に押す2色を選択せよ</h2><span>1色目を選び、続けて2色目を選択してください</span></div>
+      <div class="engine-indicator" id="engine-indicator"><i></i><span>ENGINE STANDBY</span></div>
+    </section>
+
+    <section class="color-control-console">
+      <div class="color-button-bank" id="color-button-bank" aria-label="エンジン起動用の5色ボタン">
+        <button class="color-control color-red" type="button" data-color-index="0" data-color-name="赤" aria-pressed="false"><i></i><strong>赤</strong><small>RED</small></button>
+        <button class="color-control color-blue" type="button" data-color-index="1" data-color-name="青" aria-pressed="false"><i></i><strong>青</strong><small>BLUE</small></button>
+        <button class="color-control color-yellow" type="button" data-color-index="2" data-color-name="黄" aria-pressed="false"><i></i><strong>黄</strong><small>YELLOW</small></button>
+        <button class="color-control color-pink" type="button" data-color-index="3" data-color-name="ピンク" aria-pressed="false"><i></i><strong>ピンク</strong><small>PINK</small></button>
+        <button class="color-control color-black" type="button" data-color-index="4" data-color-name="黒" aria-pressed="false"><i></i><strong>黒</strong><small>BLACK</small></button>
+      </div>
+      <div class="engine-readout" aria-live="polite"><span>SELECTED INPUT</span><strong id="engine-selection">未選択</strong><p id="engine-feedback">1色目のボタンを押してください</p></div>
+    </section>
+
+    <section class="engine-success" id="engine-success" hidden aria-live="assertive">
+      <div class="engine-success-icon" aria-hidden="true"><i></i></div><p>PROPULSION SYSTEM ONLINE</p><h2>エンジンの起動に成功した</h2><a href="screen6.html"><span>次に進む</span><i aria-hidden="true">→</i></a>
+    </section>
+  </main>
+
+  <section class="color-confirm" id="color-confirm" hidden>
+    <button class="color-confirm-backdrop" type="button" data-confirm-no aria-label="確認をキャンセル"></button>
+    <div class="color-confirm-window" role="alertdialog" aria-modal="true" aria-labelledby="color-confirm-title">
+      <small>SIMULTANEOUS INPUT CHECK</small><h2 id="color-confirm-title">2色のボタンを同時に押しますか？</h2><p id="color-confirm-message"></p>
+      <div><button type="button" data-confirm-no>いいえ</button><button class="confirm-yes" type="button" data-confirm-yes>はい</button></div>
+    </div>
+  </section>
+
+  <script src="progress.js"></script>
+  <script src="engine-control-room.js"></script>
+</body>
+</html>

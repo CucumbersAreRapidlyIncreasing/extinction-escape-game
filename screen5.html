@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080a0c">
+  <meta name="description" content="謎解きゲーム『絶滅迫る地球からの脱出』エンジン起動手順">
+  <title>エンジン起動｜絶滅迫る地球からの脱出</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="progress.css">
+  <link rel="stylesheet" href="screen3.css">
+  <link rel="stylesheet" href="screen5.css">
+  <link rel="stylesheet" href="annotation.css">
+</head>
+<body class="screen5-page" data-screen-context="engine-startup" data-game-screen="5">
+  <a class="skip-link" href="#engine-procedure">エンジン起動手順へ移動</a>
+
+  <header class="screen5-nav">
+    <a href="screen4.html" aria-label="電源復旧画面へ戻る">← <span>POWER RESTORATION</span></a>
+    <p>MISSION ARCHIVE / ENGINE STARTUP</p>
+    <span><i></i> MAIN POWER ONLINE</span>
+  </header>
+
+  <main>
+    <section class="screen5-hero">
+      <div class="screen5-grid" aria-hidden="true"></div>
+      <div class="screen5-hero-inner reveal">
+        <p class="section-kicker">ENGINE STARTUP / STEP 03</p>
+        <p class="screen5-step">MISSION <strong>03</strong></p>
+        <h1>次は<br>エンジン起動だ</h1>
+        <div class="engine-story">
+          <p>無事に電源を復旧させることができた。</p>
+          <p>次に必要なのは、宇宙船のエンジンを起動することだ。</p>
+          <p>しかし、ロボから渡された手順書は案の定汚れていて、肝心な部分を読むことができない。</p>
+          <p>手順書に貼り付けられていたパズルを解き、正しいボタンを突き止めてエンジンを起動しよう。</p>
+        </div>
+        <a href="#engine-procedure">手順書を確認する <span>↓</span></a>
+      </div>
+      <aside class="engine-state reveal" aria-label="隕石衝突まで30分">
+        <span>隕石衝突まで</span><strong>30分</strong><div><i></i></div><small>エンジン起動を急いでください</small>
+      </aside>
+    </section>
+
+    <section class="engine-procedure" id="engine-procedure" aria-labelledby="engine-procedure-title">
+      <header class="engine-procedure-heading section-shell reveal">
+        <div><p class="section-kicker">RECOVERED FILE / 01</p><h2 id="engine-procedure-title">エンジン起動手順</h2></div>
+        <p>画像をクリック／タップすると<br>大きく表示できます</p>
+      </header>
+      <article class="engine-document section-shell reveal">
+        <header><span>DOCUMENT / ENGINE STARTUP</span><strong>正しいボタンを押す</strong></header>
+        <button class="engine-document-image" type="button" data-lightbox-src="assets/screen5/images/engine-startup-procedure.png" data-lightbox-label="エンジン起動手順">
+          <img src="assets/screen5/images/engine-startup-procedure.png" alt="SからGまで電気マークを通って進み、同時に押す2色を導くエンジン起動手順" loading="lazy"><span>拡大表示</span>
+        </button>
+        
+      </article>
+    </section>
+
+    <section class="engine-room-gate" aria-labelledby="engine-room-gate-title">
+      <div class="engine-room-gate-inner reveal">
+        <p>ENGINE STARTUP REQUIRED</p>
+        <h2 id="engine-room-gate-title">エンジンを起動するために<br>コントロールルームで必要な操作を実行しよう</h2>
+        <a href="engine-control-room.html"><span>コントロールルームへ向かう</span><i aria-hidden="true">→</i></a>
+      </div>
+    </section>
+  </main>
+
+  <button class="inventory-launch" id="inventory-open" type="button" aria-haspopup="dialog" aria-controls="inventory-layer"><span class="case-icon" aria-hidden="true">▦</span><span>備品ケース</span><i aria-hidden="true">03</i></button>
+  <button class="robot-launch" type="button" aria-haspopup="dialog" aria-controls="robot-chat" aria-label="ロボに話しかける" data-open-robot><span class="robot-face" aria-hidden="true"></span><i aria-hidden="true"></i></button>
+
+  <section class="modal-layer" id="inventory-layer" hidden>
+    <button class="modal-backdrop" type="button" data-close-inventory aria-label="備品ケースを閉じる"></button>
+    <div class="inventory-window" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
+      <header class="window-header"><div><span>EQUIPMENT STORAGE</span><h2 id="inventory-title">備品ケース</h2></div><button type="button" class="window-close" data-close-inventory aria-label="閉じる">×</button></header>
+      <div class="inventory-list" id="inventory-list">
+        <p class="inventory-count">保管中の備品 <strong>2</strong></p>
+        <div class="inventory-grid">
+          <button class="inventory-item" type="button" data-open-detail="inventory-detail"><span class="item-preview" aria-hidden="true"></span><span class="item-copy"><small>ITEM 01</small><strong>謎の<br>ブロック</strong><i>詳しく見る →</i></span></button>
+          <button class="inventory-item" type="button" data-open-detail="pen-detail"><span class="item-preview item-preview-pen" aria-hidden="true"></span><span class="item-copy"><small>ITEM 02</small><strong>壊れた3色<br>ボールペン</strong><i>詳しく見る →</i></span></button>
+          <div class="inventory-slot" aria-hidden="true"><span>EMPTY</span></div>
+        </div>
+      </div>
+      <div class="inventory-detail" id="inventory-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 01</span><h3>謎のブロック</h3><p>ドラッグまたはスワイプして、各面を確認できます。</p></div><iframe src="prototype-3d.html" title="謎のブロックの3D表示" loading="lazy"></iframe></div>
+      <div class="inventory-detail" id="pen-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 02</span><h3>壊れた3色ボールペン</h3><p>回転して、後端に配置された赤・青・黒のレバーを観察できます。</p></div><iframe src="pen-viewer.html" title="壊れた3色ボールペンの3D表示" loading="lazy"></iframe></div>
+    </div>
+  </section>
+
+  <aside class="robot-chat" id="robot-chat" role="dialog" aria-modal="false" aria-labelledby="robot-chat-title" hidden>
+    <header class="chat-header"><span class="chat-face" aria-hidden="true"></span><div><small>ASSISTANT / ENGINE STARTUP</small><h2 id="robot-chat-title">ロボ</h2></div><span class="online-status">ONLINE</span><button type="button" id="robot-chat-close" aria-label="チャットを閉じる">×</button></header>
+    <div class="chat-history" id="chat-history" aria-live="polite"><div class="chat-message chat-message-robot"><span>ROBO</span><p>なにか御用ですか？</p></div></div>
+    <form class="chat-form" id="chat-form"><label for="chat-input">ロボに伝える言葉</label><div><input id="chat-input" name="message" type="text" autocomplete="off" enterkeyhint="send" placeholder="言葉を入力してください"><button type="submit" aria-label="送信">→</button></div></form>
+  </aside>
+
+  <section class="image-lightbox" id="image-lightbox" hidden><button class="lightbox-backdrop" type="button" data-close-lightbox aria-label="拡大表示を閉じる"></button><div class="lightbox-window" role="dialog" aria-modal="true" aria-labelledby="lightbox-title"><header><h2 id="lightbox-title">エンジン起動手順</h2><button type="button" data-close-lightbox aria-label="閉じる">×</button></header><div class="lightbox-scroll"><img id="lightbox-image" src="" alt=""></div></div></section>
+
+  <footer><p>EXTINCTION ESCAPE PROJECT</p><span>STEP 03 / ENGINE STARTUP</span></footer>
+  <script src="progress.js"></script>
+  <script src="app.js"></script>
+  <script src="screen5.js"></script>
+  <script src="annotation.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+(() => {
+  "use strict";
+  const body=document.body,inventoryLayer=document.querySelector("#inventory-layer"),inventoryList=document.querySelector("#inventory-list"),inventoryDetails=[...document.querySelectorAll(".inventory-detail")],chatPanel=document.querySelector("#robot-chat"),chatInput=document.querySelector("#chat-input"),chatHistory=document.querySelector("#chat-history"),lightbox=document.querySelector("#image-lightbox"),lightboxImage=document.querySelector("#lightbox-image"),lightboxTitle=document.querySelector("#lightbox-title"),cipherItem=document.querySelector("#cipher-item"),inventoryCount=document.querySelector("#inventory-count"),emptySlot=document.querySelector("#inventory-empty-slot");
+  let lastFocus=null,replyIndex=0,cipherTableReceived=Boolean(window.GameProgress?.getState().screen6.cipherTableReceived);const replies=["なんのことでしょう？","私にはわかりません。","タイムマシンの資料を確認してみてください。"];
+  const lockPage=locked=>body.classList.toggle("modal-open",locked);
+  function renderInventory(){cipherItem.hidden=!cipherTableReceived;emptySlot.hidden=cipherTableReceived;inventoryCount.textContent=cipherTableReceived?"3":"2"}
+  function openInventory(){lastFocus=document.activeElement;inventoryLayer.hidden=false;lockPage(true);inventoryLayer.querySelector("[data-close-inventory]").focus()}
+  function closeInventory(){inventoryLayer.hidden=true;inventoryList.hidden=false;inventoryDetails.forEach(detail=>detail.hidden=true);resetCombination();lockPage(false);lastFocus?.focus()}
+  document.querySelector("#inventory-open").addEventListener("click",openInventory);document.querySelectorAll("[data-close-inventory]").forEach(button=>button.addEventListener("click",closeInventory));
+  document.querySelectorAll("[data-open-detail]").forEach(button=>button.addEventListener("click",()=>{inventoryList.hidden=true;const detail=document.querySelector(`#${button.dataset.openDetail}`);detail.hidden=false;detail.querySelector("[data-detail-back]").focus()}));
+  document.querySelectorAll("[data-detail-back]").forEach(button=>button.addEventListener("click",()=>{const detail=button.closest(".inventory-detail");detail.hidden=true;inventoryList.hidden=false;resetCombination();document.querySelector(`[data-open-detail="${detail.id}"]`).focus()}));
+
+  function openChat(){lastFocus=document.activeElement;chatPanel.hidden=false;document.querySelector(".robot-launch").hidden=true;requestAnimationFrame(()=>chatInput.focus())}function closeChat(){chatPanel.hidden=true;document.querySelector(".robot-launch").hidden=false;lastFocus?.focus()}
+  document.querySelectorAll("[data-open-robot]").forEach(button=>button.addEventListener("click",openChat));document.querySelector("#robot-chat-close").addEventListener("click",closeChat);
+  function appendMessage(role,message){const wrapper=document.createElement("div"),label=document.createElement("span"),bubble=document.createElement("p");wrapper.className=`chat-message chat-message-${role}`;label.textContent=role==="robot"?"ROBO":"YOU";bubble.textContent=message;wrapper.append(label,bubble);chatHistory.append(wrapper);chatHistory.scrollTop=chatHistory.scrollHeight;return wrapper}
+  function isCipherRequest(value){const normalized=value.normalize("NFKC").replace(/[\s　。、！？!?「」『』]/g,"");const hiragana=[...normalized].map(char=>{const code=char.charCodeAt(0);return code>=0x30a1&&code<=0x30f6?String.fromCharCode(code-0x60):char}).join("");return hiragana.includes("暗号表")||hiragana.includes("暗号票")||hiragana.includes("あんごうひょう")}
+  function offerCipherTable(){const message=appendMessage("robot",cipherTableReceived?"暗号表は備品ケースに入っています。":"暗号表ですか？ こちらをどうぞ");if(cipherTableReceived)return;const button=document.createElement("button");button.type="button";button.className="chat-reward-action";button.textContent="暗号表を受け取る";button.addEventListener("click",()=>{cipherTableReceived=true;window.GameProgress?.updateScreen6({cipherTableReceived:true});renderInventory();button.remove();appendMessage("robot","暗号表が備品ケースに入りました")},{once:true});message.append(button);chatHistory.scrollTop=chatHistory.scrollHeight}
+  document.querySelector("#chat-form").addEventListener("submit",event=>{event.preventDefault();const value=chatInput.value.trim();if(!value)return;appendMessage("user",value);chatInput.value="";window.setTimeout(()=>{if(isCipherRequest(value))offerCipherTable();else{appendMessage("robot",replies[replyIndex%replies.length]);replyIndex+=1}},320)});
+
+  function openLightbox(button){lastFocus=button;lightboxImage.src=button.dataset.lightboxSrc;lightboxImage.alt=button.dataset.lightboxLabel;lightboxTitle.textContent=button.dataset.lightboxLabel;lightbox.hidden=false;lockPage(true);lightbox.querySelector("[data-close-lightbox]").focus()}function closeLightbox(){lightbox.hidden=true;lightboxImage.src="";lockPage(false);lastFocus?.focus()}
+  document.querySelectorAll("[data-lightbox-src]").forEach(button=>button.addEventListener("click",()=>openLightbox(button)));document.querySelectorAll("[data-close-lightbox]").forEach(button=>button.addEventListener("click",closeLightbox));
+
+  const overview=document.querySelector("#cipher-overview"),combineOpen=document.querySelector("#combine-open"),chooser=document.querySelector("#combine-chooser"),combineFeedback=document.querySelector("#combine-feedback"),workbench=document.querySelector("#cipher-workbench"),grid=document.querySelector("#cipher-grid"),cube=document.querySelector("#cipher-cube"),positionOutput=document.querySelector("#cube-position"),rollButtons=[...document.querySelectorAll("[data-roll]")];
+  let row=3,col=3,dragging=false;
+  const initialFaces=()=>[
+    {id:"yellow",yellow:true,n:[0,0,1],a:[0,1,0]},{id:"opposite",yellow:false,n:[0,0,-1],a:[0,-1,0]},
+    {id:"north",yellow:false,n:[0,1,0],a:[-1,0,0]},{id:"south",yellow:false,n:[0,-1,0],a:[1,0,0]},
+    {id:"west",yellow:false,n:[-1,0,0],a:[0,0,-1]},{id:"east",yellow:false,n:[1,0,0],a:[0,0,1]}
+  ];
+  let faces=initialFaces();
+  function rotateVector(vector,axis,quarter){const[x,y,z]=vector;if(axis==="x")return quarter>0?[x,-z,y]:[x,z,-y];return quarter>0?[z,y,-x]:[-z,y,x]}
+  function rotateCube(axis,quarter){faces=faces.map(face=>({...face,n:rotateVector(face.n,axis,quarter),a:rotateVector(face.a,axis,quarter)}))}
+  function renderCube(){cube.style.setProperty("--cube-row",row);cube.style.setProperty("--cube-col",col);const top=faces.find(face=>face.n[2]===1);cube.classList.toggle("is-yellow",top.yellow);const degrees=Math.round(Math.atan2(top.a[0],top.a[1])*180/Math.PI);cube.style.setProperty("--triangle-rotation",`${degrees}deg`);positionOutput.textContent=`配置：上から ${row+1} 行目・左から ${col+1} 列目`;rollButtons.forEach(button=>{const direction=button.dataset.roll;button.disabled=(direction==="up"&&row===0)||(direction==="down"&&row===6)||(direction==="left"&&col===0)||(direction==="right"&&col===6)})}
+  function resetCube(){row=3;col=3;faces=initialFaces();renderCube()}
+  function resetCombination(){chooser.hidden=true;workbench.hidden=true;overview.hidden=false;combineOpen.hidden=false;combineFeedback.textContent="";resetCube()}
+  combineOpen.addEventListener("click",()=>{chooser.hidden=false;combineOpen.hidden=true;combineFeedback.textContent="";chooser.querySelector('[data-combine-item="box"]').focus()});
+  document.querySelector('[data-combine-item="box"]').addEventListener("click",()=>{chooser.hidden=true;overview.hidden=true;workbench.hidden=false;resetCube()});
+  document.querySelector('[data-combine-item="pen"]').addEventListener("click",()=>{combineFeedback.textContent="このアイテムとは組み合わせられないようだ"});document.querySelector("#cube-reset").addEventListener("click",resetCube);document.querySelector("#combine-cancel").addEventListener("click",resetCombination);
+  const rolls={up:{dr:-1,dc:0,axis:"x",q:-1},down:{dr:1,dc:0,axis:"x",q:1},left:{dr:0,dc:-1,axis:"y",q:-1},right:{dr:0,dc:1,axis:"y",q:1}};
+  rollButtons.forEach(button=>button.addEventListener("click",()=>{const move=rolls[button.dataset.roll],nextRow=row+move.dr,nextCol=col+move.dc;if(nextRow<0||nextRow>6||nextCol<0||nextCol>6)return;row=nextRow;col=nextCol;rotateCube(move.axis,move.q);renderCube()}));
+  function dragTo(clientX,clientY){const rect=grid.getBoundingClientRect();col=Math.max(0,Math.min(6,Math.floor((clientX-rect.left)/(rect.width/7))));row=Math.max(0,Math.min(6,Math.floor((clientY-rect.top)/(rect.height/7))));renderCube()}
+  cube.addEventListener("pointerdown",event=>{dragging=true;cube.classList.add("is-dragging");cube.setPointerCapture?.(event.pointerId);dragTo(event.clientX,event.clientY);event.preventDefault()});cube.addEventListener("pointermove",event=>{if(dragging)dragTo(event.clientX,event.clientY)});cube.addEventListener("pointerup",event=>{dragging=false;cube.classList.remove("is-dragging");cube.releasePointerCapture?.(event.pointerId)});cube.addEventListener("pointercancel",()=>{dragging=false;cube.classList.remove("is-dragging")});
+  document.addEventListener("keydown",event=>{if(event.key!=="Escape")return;if(!lightbox.hidden)closeLightbox();else if(!inventoryLayer.hidden)closeInventory();else if(!chatPanel.hidden)closeChat()});
+  renderInventory();resetCube();
+})();

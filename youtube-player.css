@@ -1,0 +1,3 @@
+.youtube-player-shell{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#000}
+.youtube-player-shell iframe{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#000}
+.youtube-player-shell--vertical{width:min(100%,calc(72svh * 9 / 16));aspect-ratio:9/16;margin-inline:auto}

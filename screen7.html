@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#08090c">
+  <meta name="description" content="謎解きゲーム『絶滅迫る地球からの脱出』MISSION 05 無事に故郷に帰る">
+  <title>無事に故郷に帰る｜絶滅迫る地球からの脱出</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="progress.css"><link rel="stylesheet" href="screen3.css"><link rel="stylesheet" href="screen7.css"><link rel="stylesheet" href="youtube-player.css"><link rel="stylesheet" href="annotation.css">
+</head>
+<body class="screen7-page" data-game-screen="7">
+  <a class="skip-link" href="#palm-scan">パームスキャンへ移動</a>
+  <header class="screen7-nav"><a href="screen6.html">← <span>TIME MACHINE TEST</span></a><p>MISSION ARCHIVE / RETURN HOME</p><span><i></i> FINAL CHECK</span></header>
+
+  <button class="inventory-launch" id="inventory-open" type="button" aria-haspopup="dialog" aria-controls="inventory-layer"><span class="case-icon" aria-hidden="true">▦</span><span>備品ケース</span><i id="inventory-badge" aria-hidden="true">02</i></button>
+  <button class="robot-launch" type="button" aria-haspopup="dialog" aria-controls="robot-chat" aria-label="ロボに話しかける" data-open-robot><span class="robot-face" aria-hidden="true"></span><i aria-hidden="true"></i></button>
+
+  <section class="modal-layer" id="inventory-layer" hidden>
+    <button class="modal-backdrop" type="button" data-close-inventory aria-label="備品ケースを閉じる"></button>
+    <div class="inventory-window" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
+      <header class="window-header"><div><span>EQUIPMENT STORAGE</span><h2 id="inventory-title">備品ケース</h2></div><button type="button" class="window-close" data-close-inventory aria-label="閉じる">×</button></header>
+      <div class="inventory-list" id="inventory-list"><p class="inventory-count">保管中の備品 <strong id="inventory-count">2</strong></p><div class="inventory-grid">
+        <button class="inventory-item" type="button" data-open-detail="box-detail"><span class="item-preview" aria-hidden="true"></span><span class="item-copy"><small>ITEM 01</small><strong>謎の<br>ブロック</strong><i>詳しく見る →</i></span></button>
+        <button class="inventory-item" type="button" data-open-detail="pen-detail"><span class="item-preview item-preview-pen" aria-hidden="true"></span><span class="item-copy"><small>ITEM 02</small><strong>壊れた3色<br>ボールペン</strong><i>詳しく見る →</i></span></button>
+        <button class="inventory-item" id="cipher-item" type="button" data-open-detail="cipher-detail" hidden><span class="item-preview item-preview-cipher" aria-hidden="true">暗号表</span><span class="item-copy"><small>ITEM 03</small><strong>暗号表</strong><i>詳しく見る →</i></span></button>
+        <div class="inventory-slot" id="inventory-empty-slot" aria-hidden="true"><span>EMPTY</span></div>
+      </div></div>
+      <div class="inventory-detail" id="box-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 01</span><h3>謎のブロック</h3><p>ドラッグまたはスワイプして、各面を確認できます。</p></div><iframe src="prototype-3d.html" title="謎のブロックの3D表示" loading="lazy"></iframe></div>
+      <div class="inventory-detail" id="pen-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 02</span><h3>壊れた3色ボールペン</h3><p>回転して、後端に配置された赤・青・黒のレバーを観察できます。</p></div><iframe src="pen-viewer.html" title="壊れた3色ボールペンの3D表示" loading="lazy"></iframe></div>
+      <div class="inventory-detail cipher-flat-detail" id="cipher-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 03</span><h3>暗号表</h3><p>画像をクリックすると大きく表示できます。</p></div><button type="button" data-lightbox-src="assets/screen6/images/cipher-table.png" data-lightbox-label="暗号表"><img src="assets/screen6/images/cipher-table.png" alt="カタカナが7行7列に並んだ暗号表"><span>拡大表示</span></button></div>
+    </div>
+  </section>
+
+  <aside class="robot-chat" id="robot-chat" role="dialog" aria-modal="false" aria-labelledby="robot-chat-title" hidden><header class="chat-header"><span class="chat-face" aria-hidden="true"></span><div><small>ASSISTANT / PILOT AUTHENTICATION</small><h2 id="robot-chat-title">ロボ</h2></div><span class="online-status">ONLINE</span><button type="button" id="robot-chat-close" aria-label="チャットを閉じる">×</button></header><div class="chat-history" id="chat-history" aria-live="polite"><div class="chat-message chat-message-robot"><span>ROBO</span><p>なにか御用ですか？</p></div></div><form class="chat-form" id="chat-form"><label for="chat-input">ロボに伝える言葉</label><div><input id="chat-input" name="message" type="text" autocomplete="off" enterkeyhint="send" placeholder="言葉を入力してください"><button type="submit" aria-label="送信">→</button></div></form></aside>
+
+  <section class="image-lightbox" id="image-lightbox" hidden><button class="lightbox-backdrop" type="button" data-close-lightbox aria-label="拡大表示を閉じる"></button><div class="lightbox-window" role="dialog" aria-modal="true" aria-labelledby="lightbox-title"><header><h2 id="lightbox-title">暗号表</h2><button type="button" data-close-lightbox aria-label="閉じる">×</button></header><div class="lightbox-scroll"><img id="lightbox-image" src="" alt=""></div></div></section>
+  <main>
+    <section class="return-hero">
+      <div class="return-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="return-hero-inner reveal"><p class="section-kicker">RETURN HOME / MISSION 05</p><p class="return-step">MISSION <strong>05</strong></p><h1>無事に<br>故郷に帰る</h1>
+        <div class="return-story"><p>これで未来に帰る方法も分かった。</p><p>後はエンジンを起動し、宇宙空間でタイムマシンを起動するだけだ。</p><p>ただ、その前に最後のチェックがあるらしい。</p></div>
+        <a href="#palm-scan">最後のチェックへ <span>↓</span></a>
+      </div>
+      <aside class="return-status reveal" aria-label="隕石衝突まで10分"><span>隕石衝突まで</span><strong>10分</strong><div><i></i></div><small>最後の確認を完了してください</small></aside>
+    </section>
+
+    <section class="robot-instruction" aria-labelledby="robot-instruction-title">
+      <div class="robot-instruction-inner section-shell reveal"><div class="mission-robot-face" aria-hidden="true"></div><div class="robot-speech"><small>ROBO / PILOT AUTHENTICATION</small><h2 id="robot-instruction-title">ロボ</h2><p>「エンジンの起動にはパイロットの確認が必要です。こちらの端末に手をかざしてください。」</p></div></div>
+    </section>
+
+    <section class="palm-scan-section" id="palm-scan" aria-labelledby="palm-scan-title">
+      <div class="palm-scan-shell section-shell">
+        <header class="palm-scan-heading reveal"><p>PALM AUTHENTICATION TERMINAL</p><h2 id="palm-scan-title">手のひらを<br>かざしてください</h2><span>映像を最後まで再生すると、パイロット認証が完了します。</span></header>
+        <div class="palm-terminal reveal" id="palm-terminal"><div class="terminal-header"><span>DEVICE / PALM SCANNER</span><strong id="scan-status">WAITING FOR SCAN</strong></div><div class="video-frame"><i class="scan-line" aria-hidden="true"></i><div class="youtube-player-shell youtube-player-shell--vertical"><div id="palm-video" data-youtube-id="Z4Mrqgk0ypc" aria-label="パームスキャン動画"></div></div></div><p id="scan-message" aria-live="polite">再生ボタンを押して、パームスキャンを開始してください。</p></div>
+        <section class="scan-complete" id="scan-complete" hidden aria-live="assertive"><div aria-hidden="true"><i></i></div><p>PILOT IDENTITY VERIFIED</p><h2><small>パイロット</small><strong>ディノ・サピエンス</strong><span>の確認が完了しました</span></h2><a href="screen8.html"><span>次に進む</span><i aria-hidden="true">→</i></a></section>
+      </div>
+    </section>
+  </main>
+  <footer><p>EXTINCTION ESCAPE PROJECT</p><span>MISSION 05 / RETURN HOME</span></footer>
+  <script src="progress.js"></script><script src="app.js"></script><script src="youtube-player.js"></script><script src="screen7.js"></script><script src="annotation.js"></script>
+</body></html>

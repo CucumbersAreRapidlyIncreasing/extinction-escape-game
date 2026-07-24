@@ -1,0 +1,193 @@
+body.screen-tutorial-open { overflow: hidden; }
+
+.screen-tutorial {
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  color: #f7f8f8;
+  font-family: "Yu Gothic", "Yu Gothic UI", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+}
+
+.screen-tutorial__shade {
+  position: fixed;
+  z-index: 0;
+  border: 0;
+  background: rgba(1, 4, 7, .82);
+  backdrop-filter: blur(2px);
+}
+
+.screen-tutorial__focus {
+  position: fixed;
+  z-index: 1;
+  border: 2px solid #43dbff;
+  border-radius: 9px;
+  background: transparent;
+  box-shadow: 0 0 0 4px rgba(67, 219, 255, .18), 0 0 32px rgba(67, 219, 255, .6);
+  pointer-events: auto;
+  animation: tutorial-focus-pulse 1.7s ease-in-out infinite;
+}
+
+.screen-tutorial__arrow {
+  position: fixed;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.screen-tutorial__arrow line {
+  stroke: #43dbff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 8 7;
+  filter: drop-shadow(0 0 5px rgba(67, 219, 255, .8));
+  animation: tutorial-arrow-flow .8s linear infinite;
+}
+
+.screen-tutorial__card {
+  position: fixed;
+  z-index: 3;
+  width: min(420px, calc(100vw - 24px));
+  max-height: calc(100svh - 24px);
+  padding: clamp(22px, 4vw, 32px);
+  border: 1px solid #3a5e6c;
+  color: #eefaff;
+  background: linear-gradient(145deg, rgba(12, 27, 35, .98), rgba(5, 10, 15, .99));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .72), inset 0 0 0 1px rgba(92, 222, 255, .08);
+  overflow: auto;
+}
+
+.screen-tutorial [hidden] { display: none !important; }
+
+.screen-tutorial__eyebrow {
+  margin: 0 0 11px;
+  color: #43dbff;
+  font: 900 9px/1 ui-monospace, "Cascadia Mono", monospace;
+  letter-spacing: .18em;
+}
+
+.screen-tutorial__card h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(25px, 5vw, 36px);
+  line-height: 1.25;
+}
+
+.screen-tutorial__description {
+  min-height: 5.4em;
+  margin: 17px 0 21px;
+  color: #cbd9df;
+  font-size: clamp(13px, 2.7vw, 15px);
+  font-weight: 700;
+  line-height: 1.8;
+}
+
+.screen-tutorial__demo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: -4px 0 22px;
+  padding: 12px;
+  border: 1px solid #304b58;
+  background: #080e13;
+}
+
+.screen-tutorial__demo span {
+  display: grid;
+  place-items: center;
+  gap: 7px;
+  min-height: 74px;
+  padding: 9px 5px;
+  border: 1px solid #3c5966;
+  color: #eafaff;
+  background: #14232b;
+}
+
+.screen-tutorial__demo span i { color: #75dff5; font-size: 25px; font-style: normal; }
+.screen-tutorial__demo span b { font-size: 10px; }
+.screen-tutorial__demo span.is-clear { border-color: #743034; color: #f3b6b8; background: #291416; }
+.screen-tutorial__demo span.is-clear i { color: #f06065; }
+
+.screen-tutorial__progress {
+  display: grid;
+  grid-template-columns: repeat(var(--tutorial-step-count, 5), 1fr);
+  gap: 6px;
+  margin: 0 0 18px;
+}
+
+.screen-tutorial__progress i {
+  height: 3px;
+  background: #32414a;
+}
+
+.screen-tutorial__progress i.is-current,
+.screen-tutorial__progress i.is-complete { background: #43dbff; }
+.screen-tutorial__progress i.is-current { box-shadow: 0 0 9px rgba(67, 219, 255, .75); }
+
+.screen-tutorial__actions {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+}
+
+.screen-tutorial__actions button {
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid #40505a;
+  color: #c4cdd2;
+  background: #111a20;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.screen-tutorial__actions button:hover,
+.screen-tutorial__actions button:focus-visible {
+  border-color: #43dbff;
+  color: #fff;
+  outline: none;
+}
+
+.screen-tutorial__actions .screen-tutorial__skip {
+  padding-inline: 5px;
+  border-color: transparent;
+  color: #87949b;
+  background: transparent;
+}
+
+.screen-tutorial__actions .screen-tutorial__next {
+  min-width: 115px;
+  border-color: #43dbff;
+  color: #061016;
+  background: #43dbff;
+}
+
+.screen-tutorial__actions .screen-tutorial__next:hover,
+.screen-tutorial__actions .screen-tutorial__next:focus-visible {
+  color: #061016;
+  background: #79e8ff;
+}
+
+@keyframes tutorial-focus-pulse {
+  50% { box-shadow: 0 0 0 8px rgba(67, 219, 255, .08), 0 0 42px rgba(67, 219, 255, .8); }
+}
+
+@keyframes tutorial-arrow-flow {
+  to { stroke-dashoffset: -15; }
+}
+
+@media (max-width: 620px) {
+  .screen-tutorial__card { padding: 20px; }
+  .screen-tutorial__description { min-height: 0; margin-block: 13px 16px; line-height: 1.65; }
+  .screen-tutorial__actions { grid-template-columns: auto 1fr; }
+  .screen-tutorial__actions .screen-tutorial__skip { grid-column: 1 / -1; grid-row: 2; min-height: 32px; }
+  .screen-tutorial__actions .screen-tutorial__next { min-width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-tutorial__focus,
+  .screen-tutorial__arrow line { animation: none; }
+}

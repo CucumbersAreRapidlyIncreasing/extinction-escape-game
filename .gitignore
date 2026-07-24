@@ -1,0 +1,10 @@
+# YouTubeへ差し替えた旧ローカル動画（GitHubのファイル容量制限対象）
+/assets/video/opening.mp4
+/assets/screen7/video/palm-scan.mp4
+/assets/ending/video/bad-ending-launch.mp4
+/assets/ending/video/true-ending.mp4
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+desktop.ini

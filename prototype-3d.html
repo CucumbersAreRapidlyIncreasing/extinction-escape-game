@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>謎のブロック｜3D試作</title>
+  <link rel="stylesheet" href="prototype-3d.css">
+</head>
+<body>
+  <main class="viewer-shell">
+    <header>
+      <p class="eyebrow">EQUIPMENT CASE / 3D PROTOTYPE</p>
+      <h1>謎のブロック</h1>
+      <p class="lead">上下左右にドラッグして、すべての面を調べてください。</p>
+    </header>
+
+    <section class="viewer-card" aria-label="3Dオブジェクト表示">
+      <canvas id="cube-viewer"></canvas>
+      <div class="status" id="status">3Dデータを読み込み中…</div>
+      <div class="face-label" id="face-label" aria-live="polite">正面</div>
+      <div class="gesture-hint" aria-hidden="true">
+        <span>↕ ↔</span> ドラッグで360°回転　<span>＋ / −</span> 拡大・縮小
+      </div>
+    </section>
+
+    <nav class="controls" aria-label="3D表示操作">
+      <button type="button" id="zoom-out" aria-label="縮小">−</button>
+      <button type="button" id="reset">正面に戻す</button>
+      <button type="button" id="zoom-in" aria-label="拡大">＋</button>
+    </nav>
+
+    <p class="download-note">
+      ゲーム組み込み用：<a href="assets/authentication-box.glb" download>GLBをダウンロード</a>
+    </p>
+  </main>
+  <script src="prototype-3d.js"></script>
+</body>
+</html>

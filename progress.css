@@ -1,0 +1,153 @@
+.game-progress {
+  position: fixed;
+  z-index: 55;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  min-height: 68px;
+  padding: 8px clamp(14px,3vw,38px);
+  border-bottom: 1px solid rgba(255,255,255,.16);
+  color: #f6f6f2;
+  background: rgba(5,7,9,.96);
+  box-shadow: 0 10px 30px rgba(0,0,0,.36);
+  backdrop-filter: blur(14px);
+}
+.game-progress__tools { display:flex; align-items:center; gap:8px; justify-self:end; }
+.trajectory-launch { position:fixed; z-index:31; top:86px; right:18px; display:flex; align-items:center; justify-content:center; gap:8px; min-width:142px; min-height:48px; padding:7px 13px; border:1px solid #1e7895; border-radius:7px; color:#e8fbff; background:rgba(8,31,39,.94); box-shadow:0 8px 28px rgba(0,0,0,.4); font:800 10px/1 ui-monospace,monospace; letter-spacing:.08em; cursor:pointer; backdrop-filter:blur(10px); }
+.trajectory-launch i { color:#16cdf6; font-size:20px; font-style:normal; line-height:1; }
+.trajectory-launch:hover,.trajectory-launch:focus-visible { border-color:#38ddff; color:#fff; background:#103744; outline:none; box-shadow:0 8px 28px rgba(0,0,0,.4),0 0 18px rgba(20,201,239,.16); }
+body.has-trajectory-inventory .inventory-launch { top:144px; }
+.game-progress__screens { display:grid; grid-template-columns:repeat(var(--visible-screens,1),minmax(0,1fr)); width:min(100%,calc(var(--visible-screens,1) * 170px)); gap:6px; margin-right:18px; }
+.game-progress__screens a,.game-progress__screens span { position:relative; display:flex; align-items:center; gap:8px; min-width:0; min-height:42px; padding:6px 10px; border:1px solid #30353b; color:#9da3aa; background:#101318; font-size:10px; font-weight:800; line-height:1.25; text-decoration:none; }
+.game-progress__screens b { display:grid; flex:0 0 auto; place-items:center; width:22px; aspect-ratio:1; border:1px solid #4a5057; color:#d7dadd; font:800 9px/1 ui-monospace,monospace; }
+.game-progress__screens em { overflow:hidden; font-style:normal; text-overflow:ellipsis; white-space:nowrap; }
+.game-progress__screens a:hover,.game-progress__screens a:focus-visible { border-color:var(--red-bright); color:#fff; outline:none; }
+.game-progress__screens [aria-current="page"] { border-color:var(--red); color:#fff; background:#251112; }
+.game-progress__screens [aria-current="page"] b { border-color:var(--red-bright); color:#fff; background:var(--red); }
+.game-progress [hidden],.game-reset-dialog[hidden] { display:none !important; }
+.game-progress__menu { position:relative; justify-self:end; }
+.game-progress__menu-button { display:grid; place-content:center; gap:5px; width:44px; height:44px; padding:0; border:1px solid #343941; color:#fff; background:#11151a; cursor:pointer; }
+.game-progress__menu-button > i { display:block; width:19px; height:2px; background:currentColor; transition:transform .2s,opacity .2s; }
+.game-progress__menu-button:hover,.game-progress__menu-button:focus-visible,.game-progress__menu-button[aria-expanded="true"] { border-color:var(--red-bright); color:#fff; outline:none; background:#251112; }
+.game-progress__menu-button[aria-expanded="true"] > i:first-child { transform:translateY(7px) rotate(45deg); }
+.game-progress__menu-button[aria-expanded="true"] > i:nth-child(2) { opacity:0; }
+.game-progress__menu-button[aria-expanded="true"] > i:last-child { transform:translateY(-7px) rotate(-45deg); }
+.game-progress__menu-panel { position:absolute; top:calc(100% + 10px); right:0; width:220px; padding:12px; border:1px solid #3a3f46; background:#0b0e12; box-shadow:0 18px 55px rgba(0,0,0,.65); }
+.game-progress__menu-panel::before { content:""; position:absolute; top:-11px; right:0; width:52px; height:11px; }
+.game-progress__menu-panel small { display:block; padding:3px 4px 11px; color:#727982; font:800 8px/1 ui-monospace,monospace; letter-spacing:.16em; }
+.game-progress__menu-panel button,.game-progress__menu-panel a { display:flex; justify-content:space-between; align-items:center; width:100%; min-height:46px; padding:0 13px; border:1px solid #492223; color:#fff; background:#241112; font:inherit; font-size:12px; font-weight:900; text-decoration:none; cursor:pointer; }
+.game-progress__menu-panel button i,.game-progress__menu-panel a i { color:var(--red-bright); font-size:19px; font-style:normal; }
+.game-progress__menu-panel button + button,.game-progress__menu-panel a + button,.game-progress__menu-panel button + a { margin-top:8px; }
+.game-progress__menu-panel .game-progress__hint { border-color:#40564c; background:#132019; }
+.game-progress__menu-panel .game-progress__hint i { color:#5de2a4; }
+.game-progress__menu-panel .game-progress__hint:hover,.game-progress__menu-panel .game-progress__hint:focus-visible { border-color:#5de2a4; background:#193126; outline:none; }
+.game-progress__menu-panel .game-progress__tutorial { border-color:#28556a; background:#10232c; }
+.game-progress__menu-panel .game-progress__tutorial i { display:grid; place-items:center; width:22px; aspect-ratio:1; border:1px solid #43dbff; border-radius:50%; color:#43dbff; font-size:12px; }
+.game-progress__menu-panel .game-progress__tutorial:hover,.game-progress__menu-panel .game-progress__tutorial:focus-visible { border-color:#43dbff; background:#15323e; outline:none; }
+.game-progress__menu-panel .game-progress__debug-reset { border-color:#31475b; background:#111d29; }
+.game-progress__menu-panel .game-progress__debug-reset i { color:#65a8ed; }
+.game-progress__menu-panel .game-progress__debug-reset:hover,.game-progress__menu-panel .game-progress__debug-reset:focus-visible { border-color:#65a8ed; background:#182b3d; }
+.game-progress__menu-panel button:hover,.game-progress__menu-panel button:focus-visible { border-color:var(--red-bright); background:#371516; outline:none; }
+.game-reset-dialog { position:fixed; z-index:120; inset:0; display:grid; place-items:center; padding:18px; color:#f5f5f1; }
+.game-reset-dialog__backdrop { position:absolute; inset:0; width:100%; height:100%; padding:0; border:0; background:rgba(0,0,0,.82); cursor:default; backdrop-filter:blur(5px); }
+.game-reset-dialog__window { position:relative; width:min(500px,100%); padding:clamp(26px,5vw,46px); border:1px solid #4a3132; background:#0d1014; box-shadow:0 30px 100px rgba(0,0,0,.8); }
+.game-reset-dialog__window small { color:var(--red-bright); font:800 9px/1 ui-monospace,monospace; letter-spacing:.18em; }
+.game-reset-dialog__window h2 { margin:14px 0 12px; font-size:clamp(25px,5vw,38px); line-height:1.3; }
+.game-reset-dialog__window p { margin:0; color:#9da3aa; font-size:13px; font-weight:700; line-height:1.9; }
+.game-reset-dialog__window > div { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:30px; }
+.game-reset-dialog__window button { min-height:52px; padding:8px 12px; border:1px solid #3a4047; color:#d6d9dd; background:#181c21; font:inherit; font-size:12px; font-weight:900; cursor:pointer; }
+.game-reset-dialog__window button:hover,.game-reset-dialog__window button:focus-visible { border-color:#858c94; color:#fff; outline:none; }
+.game-reset-dialog__window .game-reset-dialog__confirm { border-color:var(--red); color:#fff; background:var(--red); }
+.game-reset-dialog__window .game-reset-dialog__confirm:hover,.game-reset-dialog__window .game-reset-dialog__confirm:focus-visible { border-color:var(--red-bright); background:var(--red-bright); }
+.game-step-reset-dialog__window { width:min(680px,100%); max-height:calc(100svh - 36px); overflow:auto; }
+.game-step-reset-dialog__window > .game-step-reset-dialog__steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:26px; }
+.game-step-reset-dialog__steps button { display:grid; grid-template-columns:30px 1fr auto; align-items:center; gap:10px; min-height:52px; padding:8px 12px; text-align:left; }
+.game-step-reset-dialog__steps button b { display:grid; place-items:center; width:28px; aspect-ratio:1; border:1px solid #58616c; color:#fff; font:800 9px/1 ui-monospace,monospace; }
+.game-step-reset-dialog__steps button span { color:#e4e7ea; }
+.game-step-reset-dialog__steps button small { color:#ef5559; font:800 8px/1 ui-monospace,monospace; letter-spacing:.08em; }
+.game-step-reset-dialog__steps button:hover,.game-step-reset-dialog__steps button:focus-visible { border-color:#65a8ed; background:#172536; }
+.game-step-reset-dialog__window > .game-step-reset-dialog__cancel { width:100%; margin-top:12px; }
+body.has-game-progress { padding-top:68px; }
+body.has-open-simulator { overflow:hidden; }
+
+.trajectory-simulator[hidden],.trajectory-simulator [hidden] { display:none !important; }
+.trajectory-simulator { position:fixed; z-index:130; inset:0; display:grid; place-items:center; padding:18px; color:#f4f8f8; }
+.trajectory-simulator__backdrop { position:absolute; inset:0; width:100%; height:100%; padding:0; border:0; background:rgba(0,0,0,.86); backdrop-filter:blur(7px); cursor:default; }
+.trajectory-simulator__window { position:relative; display:grid; grid-template-rows:auto auto minmax(0,1fr) auto auto; width:min(1120px,100%); max-height:calc(100svh - 36px); overflow:hidden; border:1px solid #23667a; background:#05090b; box-shadow:0 30px 100px rgba(0,0,0,.85),0 0 50px rgba(0,190,230,.08); }
+.trajectory-simulator__header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:16px 20px; border-bottom:1px solid #183e49; background:#081318; }
+.trajectory-simulator__header small { display:block; margin-bottom:5px; color:#24ccef; font:800 8px/1 ui-monospace,monospace; letter-spacing:.18em; }
+.trajectory-simulator__header h2 { margin:0; font-size:clamp(17px,3vw,25px); letter-spacing:.04em; }
+.trajectory-simulator__header button { flex:0 0 auto; width:40px; height:40px; padding:0; border:1px solid #315461; color:#d9eef3; background:#0c2027; font:300 28px/1 sans-serif; cursor:pointer; }
+.trajectory-simulator__header button:hover,.trajectory-simulator__header button:focus-visible { border-color:#38ddff; outline:none; }
+.trajectory-simulator__readout { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:22px; padding:10px 20px; border-bottom:1px solid #15333c; background:#071014; }
+.trajectory-simulator__readout > div { display:flex; align-items:baseline; gap:11px; }
+.trajectory-simulator__readout > div > span { color:#8299a0; font-size:10px; font-weight:800; }
+.trajectory-simulator__readout strong { color:#effcff; font:900 clamp(26px,5vw,42px)/1 ui-monospace,monospace; }
+.trajectory-simulator__readout strong small { margin-left:5px; color:#80dcef; font-size:12px; letter-spacing:.05em; }
+.trajectory-simulator__readout p { display:flex; align-items:center; justify-content:flex-end; gap:9px; margin:0; color:#99bbc3; font-size:11px; font-weight:900; }
+.trajectory-simulator__readout p i { width:8px; height:8px; border-radius:50%; background:#24d7f6; box-shadow:0 0 10px #24d7f6; }
+.trajectory-simulator__stage { position:relative; min-height:260px; overflow:hidden; background:#020506; touch-action:none; }
+.trajectory-simulator__stage svg { display:block; width:100%; height:100%; min-height:260px; max-height:56svh; color:#00bde7; background:#020506; }
+.trajectory-grid { opacity:.52; }
+.trajectory-track { fill:none; stroke:#ddeb00; stroke-width:8; }
+.trajectory-track--asteroid { stroke-width:7; }
+.trajectory-earth { cursor:grab; outline:none; touch-action:none; }
+.trajectory-earth.is-dragging { cursor:grabbing; }
+.trajectory-earth [data-earth-body] { fill:#071012; stroke:#e4f300; stroke-width:10; transition:filter .15s; }
+.trajectory-earth__handle { fill:#e4f300; stroke:#e4f300; stroke-width:5; }
+.trajectory-earth text,.trajectory-asteroid text { fill:#e4f300; stroke:#071012; stroke-width:5; paint-order:stroke; font:900 34px/1 sans-serif; pointer-events:none; }
+.trajectory-earth:focus-visible [data-earth-body] { filter:drop-shadow(0 0 12px rgba(228,243,0,.8)); stroke:#fff93b; }
+.trajectory-asteroid [data-asteroid-glow] { fill:#ff4c17; opacity:.95; }
+.trajectory-asteroid [data-asteroid-body] { fill:#ef0800; stroke:#ff6a14; stroke-width:4; }
+.trajectory-asteroid text { fill:#ffb21b; font-size:28px; }
+.trajectory-simulator__impact { position:absolute; top:18px; left:50%; display:flex; align-items:center; gap:10px; transform:translateX(-50%); padding:9px 14px; border:1px solid #ff3a2f; color:#fff; background:rgba(111,5,4,.93); box-shadow:0 0 30px rgba(255,30,20,.45); pointer-events:none; animation:trajectory-warning .55s steps(2,end) infinite; }
+.trajectory-simulator__impact b { color:#ff9d91; font:900 9px/1 ui-monospace,monospace; letter-spacing:.15em; }
+.trajectory-simulator__impact span { font-size:11px; font-weight:900; }
+.trajectory-simulator.is-danger .trajectory-simulator__readout { background:#210707; border-color:#74221d; }
+.trajectory-simulator.is-danger .trajectory-simulator__readout p { color:#ffb2aa; }
+.trajectory-simulator.is-danger .trajectory-simulator__readout p i { background:#ff3025; box-shadow:0 0 12px #ff3025; }
+.trajectory-simulator.is-danger .trajectory-earth [data-earth-body] { stroke:#ff382b; filter:drop-shadow(0 0 12px rgba(255,37,25,.75)); }
+.trajectory-simulator.is-passed .trajectory-simulator__readout p i { background:#7ee38c; box-shadow:0 0 10px #7ee38c; }
+.trajectory-simulator__controls { display:grid; grid-template-columns:46px minmax(0,1fr) 46px auto; gap:8px; padding:12px 20px; border-top:1px solid #173843; background:#081419; }
+.trajectory-simulator__controls button { min-height:42px; padding:0 13px; border:1px solid #286172; color:#e8fbff; background:#102630; font:900 18px/1 sans-serif; cursor:pointer; }
+.trajectory-simulator__controls button:hover,.trajectory-simulator__controls button:focus-visible { border-color:#39dfff; background:#153742; outline:none; }
+.trajectory-simulator__controls .trajectory-simulator__reset { font-size:10px; white-space:nowrap; }
+.trajectory-simulator__controls input { min-width:0; accent-color:#12c9ee; cursor:ew-resize; }
+.trajectory-simulator__guide { display:flex; align-items:center; gap:9px; margin:0; padding:10px 20px; color:#a8bcc1; background:#050b0e; font-size:10px; font-weight:800; }
+.trajectory-simulator__guide i { color:#e7f400; font-size:17px; font-style:normal; }
+.trajectory-simulator__guide small { margin-left:auto; color:#627a80; font:700 8px/1 ui-monospace,monospace; letter-spacing:.08em; }
+@keyframes trajectory-warning { 50% { opacity:.68; } }
+
+@media (max-width:760px) {
+  .game-progress { grid-template-columns:minmax(0,1fr) auto; min-height:62px; padding:6px 8px; }
+  .game-progress__screens { width:100%; gap:2px; margin:0 6px 0 0; }
+  .game-progress__screens a,.game-progress__screens span { justify-content:center; min-height:38px; padding:4px; }
+  .game-progress__screens b { width:20px; }
+  .game-progress__screens em { display:none; }
+  .game-progress__menu-button { width:40px; height:40px; }
+  .game-progress__tools { gap:4px; }
+  .trajectory-launch { top:76px; right:12px; min-width:0; min-height:44px; padding:7px 11px; }
+  body.has-trajectory-inventory .inventory-launch { top:auto; right:12px; bottom:96px; }
+  body.has-trajectory-inventory .trajectory-launch { top:auto; right:12px; bottom:168px; flex-direction:column; gap:3px; width:64px; min-height:64px; padding:6px; border-radius:50%; font-size:8px; letter-spacing:0; }
+  .game-progress__menu-panel { right:-4px; }
+  .game-reset-dialog__window > div { grid-template-columns:1fr; }
+  .game-step-reset-dialog__window > .game-step-reset-dialog__steps { grid-template-columns:1fr; }
+  body.has-game-progress { padding-top:62px; }
+  .trajectory-simulator { padding:0; }
+  .trajectory-simulator__window { width:100%; max-height:100svh; height:100svh; border:0; }
+  .trajectory-simulator__header { padding:12px 14px; }
+  .trajectory-simulator__readout { padding:9px 14px; gap:8px; }
+  .trajectory-simulator__readout > div { gap:6px; }
+  .trajectory-simulator__readout p { font-size:9px; }
+  .trajectory-simulator__controls { grid-template-columns:42px minmax(0,1fr) 42px; padding:10px 12px; }
+  .trajectory-simulator__controls .trajectory-simulator__reset { grid-column:1/-1; min-height:36px; }
+  .trajectory-simulator__guide { flex-wrap:wrap; padding:9px 13px; }
+  .trajectory-simulator__guide small { width:100%; margin:0; padding-left:26px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .trajectory-simulator__impact { animation:none; }
+}

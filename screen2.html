@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050607">
+  <meta name="description" content="謎解きゲーム『絶滅迫る地球からの脱出』オープニングとミッションログ">
+  <title>オープニング｜絶滅迫る地球からの脱出</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="progress.css">
+  <link rel="stylesheet" href="screen2.css">
+  <link rel="stylesheet" href="youtube-player.css">
+</head>
+<body class="screen2-page" data-game-screen="2">
+  <a class="skip-link" href="#opening">オープニングへ移動</a>
+
+  <header class="mission-nav">
+    <a class="back-link" href="index.html" aria-label="プロローグへ戻る">← <span>PROLOGUE</span></a>
+    <p>MISSION ARCHIVE / FILE 01</p>
+    <span class="mission-nav-status"><i></i> PLAYING</span>
+  </header>
+
+  <main>
+    <section class="opening-section" id="opening" aria-labelledby="opening-title">
+      <div class="opening-heading reveal">
+        <p class="section-kicker">OPENING MOVIE</p>
+        <h1 id="opening-title">記録映像</h1>
+        <p>月探査ミッション事故後に回収された映像です</p>
+      </div>
+
+      <div class="video-console reveal">
+        <div class="console-bar" aria-hidden="true">
+          <span>RECOVERED DATA</span>
+          <i></i>
+          <span>VIDEO / 001</span>
+        </div>
+        <div class="video-frame">
+          <div class="youtube-player-shell">
+            <iframe src="https://www.youtube.com/embed/E2zF4YdaHN8?rel=0&amp;playsinline=1" title="絶滅脱出 オープニングムービー" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
+          <span class="frame-corner corner-tl" aria-hidden="true"></span>
+          <span class="frame-corner corner-tr" aria-hidden="true"></span>
+          <span class="frame-corner corner-bl" aria-hidden="true"></span>
+          <span class="frame-corner corner-br" aria-hidden="true"></span>
+        </div>
+        <div class="console-footer" aria-hidden="true">
+          <span>AVC / AAC</span>
+          <span>LOCAL ARCHIVE</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="mission-log" aria-labelledby="log-title">
+      <div class="log-grid section-shell">
+        <div class="log-sidebar reveal">
+          <p class="section-number">03</p>
+          <p class="section-kicker">MISSION LOG</p>
+          <h2 id="log-title">不時着</h2>
+          <dl>
+            <div><dt>ERA</dt><dd>6500万年前</dd></div>
+            <div><dt>IMPACT</dt><dd>T - 00:50:00</dd></div>
+            <div><dt>SHIP POWER</dt><dd class="danger">LOST</dd></div>
+          </dl>
+        </div>
+
+        <div class="log-story">
+          <article class="log-entry reveal">
+            <p>私が不時着したのは、<br><strong>今まさに隕石が迫る6500万年前の地球。</strong></p>
+            <p>隕石衝突まで残り50分。<br>一刻も早くここから脱出しなくてはならない。</p>
+          </article>
+
+          <article class="memory-alert reveal" aria-label="記憶消失">
+            <span>MEMORY ERROR</span>
+            <p>しかし、何も思い出せない……</p>
+          </article>
+
+          <article class="log-entry reveal">
+            <p>状況から考えて、私は宇宙飛行士なのだろう。</p>
+            <p>ロボットがしきりに警告を発しているが、<br>それ以上のことはしてくれないようだ。</p>
+          </article>
+
+          <article class="power-alert reveal">
+            <div aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <p><strong>宇宙船の電源が消失している。</strong><br>復旧の方法を考えなくては。</p>
+          </article>
+
+          <article class="log-entry reveal">
+            <p>ふと、視界の端にメモが貼り付けられているのを見つける。</p>
+          </article>
+
+          <blockquote class="found-memo reveal">
+            <span>EMERGENCY MEMO</span>
+            <p>いざというときは<br>この謎を解け</p>
+          </blockquote>
+
+          <article class="log-entry log-entry-final reveal">
+            <p>メモの横には、数枚の紙の入ったファイルがあった。</p>
+            <p>今はこれにかけるしかない。<br>私は、早速問題に取り掛かった。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="problem-gate" aria-label="問題画面へ">
+      <div class="gate-inner reveal">
+        <p>STEP 01 / PUZZLE FILES</p>
+        <h2>問題ファイルを開きますか？</h2>
+        <a class="problem-button" href="screen3.html">
+          <span>問題を確認する</span>
+          <i aria-hidden="true">→</i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>EXTINCTION ESCAPE PROJECT</p>
+    <span>20XX / LUNAR EXPLORATION MISSION</span>
+  </footer>
+
+  <script src="progress.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
