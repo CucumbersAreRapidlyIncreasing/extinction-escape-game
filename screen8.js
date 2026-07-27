@@ -120,6 +120,7 @@
     const hasGenericTimeMachine = includesAny(text, ["タイムマシン"]) && !hasSystem3;
     const actionTypes = [
       { words: ["設置"], label: "設置" },
+      { words: ["装着"], label: "装着" },
       { words: ["刺す", "挿す", "さす", "刺して", "挿して", "さして"], label: "刺す" },
     ];
     const matchedAction = actionTypes.find(type => includesAny(text, type.words));
@@ -369,7 +370,8 @@
   }
 
   function actionPhrase(action) {
-    return action === "設置" ? "設置する" : action;
+    if (["設置", "装着"].includes(action)) return `${action}する`;
+    return action;
   }
 
   function advanceFromInstruction(parts, summarize = false) {
