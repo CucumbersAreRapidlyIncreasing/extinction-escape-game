@@ -42,11 +42,12 @@
     const label = document.createElement("span"); label.textContent = role === "robot" ? "ROBO" : "YOU";
     const bubble = document.createElement("p"); bubble.textContent = text;
     wrapper.append(label, bubble); chatHistory.append(wrapper); chatHistory.scrollTop = chatHistory.scrollHeight;
+    return wrapper;
   }
   document.querySelector("#chat-form").addEventListener("submit", event => {
     event.preventDefault(); const value = chatInput.value.trim(); if (!value) return;
     appendMessage("user", value); chatInput.value = "";
-    window.setTimeout(() => { appendMessage("robot", replies[replyIndex % replies.length]); replyIndex += 1; }, 320);
+    window.GameProgress.withRobotTyping(() => { if (window.GameProgress?.respondToRobotKeyword(value, appendMessage)) return; window.GameProgress?.respondToRobotSmallTalk(value, appendMessage); });
   });
 
   function openLightbox(button) { lastFocus = button; lightboxImage.src = button.dataset.lightboxSrc; lightboxImage.alt = button.dataset.lightboxLabel; lightboxTitle.textContent = button.dataset.lightboxLabel; lightbox.hidden = false; lockPage(true); lightbox.querySelector("[data-close-lightbox]").focus(); }

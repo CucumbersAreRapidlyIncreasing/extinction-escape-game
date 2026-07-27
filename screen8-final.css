@@ -1,0 +1,108 @@
+.mission-order-form [data-answer-field].is-correct input {
+  border-color: #3e9df2 !important;
+  outline: 2px solid #3e9df2;
+  outline-offset: -2px;
+  color: #dff1ff;
+  background: #071a2b !important;
+  box-shadow: 0 0 16px rgba(62, 157, 242, .35) !important;
+}
+
+.mission-order-form [data-answer-field].is-wrong input {
+  border-color: #ef4449 !important;
+  outline: 2px solid #ef4449;
+  outline-offset: -2px;
+  color: #ffe5e5;
+  background: #29090c !important;
+  box-shadow: 0 0 16px rgba(239, 68, 73, .3) !important;
+}
+
+.mission-order-form input:disabled {
+  opacity: 1;
+  -webkit-text-fill-color: currentColor;
+}
+
+.mission-order-form.is-complete {
+  border-left: 4px solid #3e9df2;
+}
+
+.work-fields {
+  display: grid;
+  gap: 15px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.work-fields li {
+  position: relative;
+  padding-left: 17px;
+}
+
+.work-fields li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  color: #65a8ed;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.work-fields label {
+  margin: 0;
+}
+
+.mission-order-form fieldset.is-wrong .mini-sequence li {
+  border-color: #ef4449;
+  color: #ffe5e5;
+  background: #29090c;
+  box-shadow: inset 0 0 0 1px #ef4449;
+}
+
+.mission-order-form fieldset.is-correct .mini-sequence li {
+  border-color: #3e9df2;
+  color: #dff1ff;
+  background: #071a2b;
+  box-shadow: inset 0 0 0 1px #3e9df2;
+}
+
+.chat-form.is-choice-prompt input {
+  border-color: #65a8ed;
+  background: #071a2b;
+  box-shadow: 0 0 0 1px #65a8ed, 0 0 18px rgba(101, 168, 237, .28);
+}
+
+.chat-form.is-choice-prompt input::placeholder {
+  color: #cce7ff;
+  opacity: 1;
+}
+
+.final-debug-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.final-debug-controls button {
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid #886d2c;
+  color: #ffe39a;
+  background: #211a09;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.final-debug-controls button:hover,
+.final-debug-controls button:focus-visible {
+  border-color: #ffcf52;
+  background: #33270b;
+  outline: none;
+}
+
+@media (max-width: 560px) {
+  .final-debug-controls { grid-template-columns: 1fr; }
+}

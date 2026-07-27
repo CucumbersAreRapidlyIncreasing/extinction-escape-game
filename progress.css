@@ -50,6 +50,10 @@ body.has-trajectory-inventory .inventory-launch { top:144px; }
 .game-progress__menu-panel .game-progress__debug-reset { border-color:#31475b; background:#111d29; }
 .game-progress__menu-panel .game-progress__debug-reset i { color:#65a8ed; }
 .game-progress__menu-panel .game-progress__debug-reset:hover,.game-progress__menu-panel .game-progress__debug-reset:focus-visible { border-color:#65a8ed; background:#182b3d; }
+.game-progress__menu-panel .game-progress__keyboard-test { border-color:#665536; background:#272013; }
+.game-progress__menu-panel .game-progress__keyboard-test i { color:#f2c86a; }
+.game-progress__menu-panel .game-progress__keyboard-test[aria-pressed="true"] { border-color:#f2c86a; background:#41351c; }
+.game-progress__menu-panel .game-progress__keyboard-test:hover,.game-progress__menu-panel .game-progress__keyboard-test:focus-visible { border-color:#f2c86a; background:#382d18; outline:none; }
 .game-progress__menu-panel button:hover,.game-progress__menu-panel button:focus-visible { border-color:var(--red-bright); background:#371516; outline:none; }
 .game-reset-dialog { position:fixed; z-index:120; inset:0; display:grid; place-items:center; padding:18px; color:#f5f5f1; }
 .game-reset-dialog__backdrop { position:absolute; inset:0; width:100%; height:100%; padding:0; border:0; background:rgba(0,0,0,.82); cursor:default; backdrop-filter:blur(5px); }
@@ -72,6 +76,36 @@ body.has-trajectory-inventory .inventory-launch { top:144px; }
 .game-step-reset-dialog__window > .game-step-reset-dialog__cancel { width:100%; margin-top:12px; }
 body.has-game-progress { padding-top:68px; }
 body.has-open-simulator { overflow:hidden; }
+
+.ios-keyboard-test[hidden] { display:none !important; }
+.ios-keyboard-test { --ios-keyboard-height:310px; position:fixed; z-index:145; left:0; right:0; bottom:0; height:var(--ios-keyboard-height); padding:0 max(8px,env(safe-area-inset-left)) env(safe-area-inset-bottom); color:#111; background:linear-gradient(#d7d9dd,#c9cbd0); border-top:1px solid #8e9299; box-shadow:0 -12px 35px rgba(0,0,0,.36); font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif; }
+.ios-keyboard-test__toolbar { display:flex; align-items:center; justify-content:space-between; height:42px; padding:0 5px 0 10px; color:#3d4147; font-size:11px; font-weight:700; }
+.ios-keyboard-test__toolbar span { display:flex; align-items:center; gap:7px; }
+.ios-keyboard-test__toolbar span i { display:block; width:7px; height:7px; border-radius:50%; background:#ee9a24; box-shadow:0 0 0 3px rgba(238,154,36,.18); }
+.ios-keyboard-test__toolbar button { min-width:64px; height:30px; padding:0 11px; border:0; border-radius:7px; color:#fff; background:#3978d0; font:inherit; font-weight:800; cursor:pointer; }
+.ios-keyboard-test__suggestions { display:grid; grid-template-columns:repeat(3,1fr); height:40px; margin:0 2px 8px; border-radius:6px; background:rgba(255,255,255,.45); }
+.ios-keyboard-test__suggestions span { display:grid; place-items:center; border-right:1px solid rgba(70,74,80,.2); font-size:12px; }
+.ios-keyboard-test__suggestions span:last-child { border-right:0; }
+.ios-keyboard-test__keys { display:grid; gap:10px; }
+.ios-keyboard-test__keys>div { display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px; }
+.ios-keyboard-test__keys>div:last-child { grid-template-columns:1.1fr .8fr .8fr 4fr 1.2fr; }
+.ios-keyboard-test kbd { display:grid; place-items:center; min-width:0; height:48px; border:0; border-radius:6px; color:#15171a; background:#fff; box-shadow:0 1px 0 #777b82,0 2px 3px rgba(0,0,0,.28); font:500 18px/1 inherit; }
+.ios-keyboard-test kbd.is-function { background:#aeb3bb; font-size:11px; font-weight:700; }
+.ios-keyboard-test kbd.is-space { font-size:12px; }
+.ios-keyboard-test__home { width:134px; height:5px; margin:16px auto 0; border-radius:9px; background:#17191c; }
+body.has-ios-keyboard-test { --ios-keyboard-height:310px; padding-bottom:var(--ios-keyboard-height); }
+body.has-ios-keyboard-test .robot-chat { bottom:calc(var(--ios-keyboard-height) + 6px); height:min(620px,calc(100svh - var(--ios-keyboard-height) - 12px)); }
+body.has-ios-keyboard-test .robot-launch { bottom:calc(var(--ios-keyboard-height) + 14px); }
+body.has-ios-keyboard-test .inventory-launch { bottom:calc(var(--ios-keyboard-height) + 96px); top:auto; }
+body.has-ios-keyboard-test .trajectory-launch { bottom:calc(var(--ios-keyboard-height) + 168px); top:auto; }
+
+body.has-mobile-keyboard-chat .robot-chat,
+body.has-mobile-keyboard-chat .chat-form { transition:none !important; }
+body.mobile-keyboard-move-chat .robot-chat { top:var(--mobile-viewport-top); right:6px; bottom:auto; width:calc(100% - 12px); height:var(--mobile-viewport-height); max-height:var(--mobile-viewport-height); }
+body.mobile-keyboard-float-input .chat-form { position:fixed; z-index:76; left:var(--mobile-chat-left); bottom:var(--mobile-keyboard-inset); width:var(--mobile-chat-width); box-shadow:0 -10px 28px rgba(0,0,0,.48); }
+@media (hover:none), (pointer:coarse) {
+  html,body { touch-action:manipulation; }
+}
 
 .trajectory-simulator[hidden],.trajectory-simulator [hidden] { display:none !important; }
 .trajectory-simulator { position:fixed; z-index:130; inset:0; display:grid; place-items:center; padding:18px; color:#f4f8f8; }
@@ -136,6 +170,19 @@ body.has-open-simulator { overflow:hidden; }
   .game-reset-dialog__window > div { grid-template-columns:1fr; }
   .game-step-reset-dialog__window > .game-step-reset-dialog__steps { grid-template-columns:1fr; }
   body.has-game-progress { padding-top:62px; }
+  .ios-keyboard-test { --ios-keyboard-height:286px; }
+  .ios-keyboard-test__toolbar { height:38px; }
+  .ios-keyboard-test__suggestions { height:36px; margin-bottom:7px; }
+  .ios-keyboard-test__keys { gap:8px; }
+  .ios-keyboard-test__keys>div { gap:4px; }
+  .ios-keyboard-test kbd { height:45px; font-size:16px; }
+  .ios-keyboard-test__home { margin-top:13px; }
+  body.has-ios-keyboard-test { --ios-keyboard-height:286px; }
+  body.has-ios-keyboard-test .robot-chat { bottom:var(--ios-keyboard-height); width:100%; height:calc(100svh - var(--ios-keyboard-height)); right:0; border-inline:0; }
+  body.has-ios-keyboard-test .robot-launch { bottom:calc(var(--ios-keyboard-height) + 14px); }
+  body.has-ios-keyboard-test .inventory-launch { bottom:calc(var(--ios-keyboard-height) + 86px); }
+  body.has-ios-keyboard-test .trajectory-launch { bottom:calc(var(--ios-keyboard-height) + 158px); }
+  .chat-form input,.chat-form textarea { font-size:16px !important; }
   .trajectory-simulator { padding:0; }
   .trajectory-simulator__window { width:100%; max-height:100svh; height:100svh; border:0; }
   .trajectory-simulator__header { padding:12px 14px; }

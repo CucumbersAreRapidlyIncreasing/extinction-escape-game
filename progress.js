@@ -2,6 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "extinctionEscape.progress.v1";
+  const TUTORIAL_STORAGE_KEY = "extinctionEscape.screen3Tutorial.v1";
   const WINDOW_PREFIX = "EXTINCTION_ESCAPE_STATE:";
   const currentScreen = Math.max(1, Number(document.body.dataset.gameScreen) || 1);
   const screens = [
@@ -16,6 +17,15 @@
   ];
   const collisionMinutesByProgress = { 3: 50, 4: 40, 5: 30, 6: 20, 7: 10, 8: 10 };
 
+  function normalizeChatHistory(value) {
+    if (!Array.isArray(value)) return [];
+    return value.slice(-120).map(message => ({
+      role: ["user", "robot", "system"].includes(message?.role) ? message.role : "robot",
+      text: String(message?.text || "").slice(0, 1000),
+      screen: Math.max(3, Math.min(8, Number(message?.screen) || 3)),
+    })).filter(message => message.text);
+  }
+
   function normalize(candidate = {}) {
     const step = candidate.screen3 || {};
     return {
@@ -24,6 +34,7 @@
       maxScreen: Math.max(1, Math.min(screens.length, Number(candidate.maxScreen) || 1)),
       lastScreen: Math.max(1, Math.min(screens.length, Number(candidate.lastScreen) || 1)),
       updatedAt: Number(candidate.updatedAt) || 0,
+      chatHistory: normalizeChatHistory(candidate.chatHistory),
       screen3: {
         envelopeReceived: Boolean(step.envelopeReceived),
         envelopeUnlocked: Boolean(step.envelopeUnlocked),
@@ -54,6 +65,26 @@
         timeMachinePrepared: Boolean(candidate.screen8?.timeMachinePrepared),
         engineStarted: Boolean(candidate.screen8?.engineStarted),
         ending: ["true", "bad"].includes(candidate.screen8?.ending) ? candidate.screen8.ending : "",
+        briefingStage: ["idle", "prompting", "choice", "declined", "command", "strategy", "work", "executing", "complete"].includes(candidate.screen8?.briefingStage)
+          ? candidate.screen8.briefingStage
+          : "idle",
+        workAnswers: Array.isArray(candidate.screen8?.workAnswers) && candidate.screen8.workAnswers.length === 4
+          ? candidate.screen8.workAnswers.map(value => String(value || "").slice(0, 80))
+          : ["", "", "", ""],
+        workSubmitted: Boolean(candidate.screen8?.workSubmitted),
+        workSequence: Array.isArray(candidate.screen8?.workSequence)
+          ? candidate.screen8.workSequence.slice(0, 5).map(value => Math.max(0, Math.min(4, Number(value) || 0)))
+          : [],
+        partialInstruction: candidate.screen8?.partialInstruction && ["target", "item", "action"].includes(candidate.screen8.partialInstruction.missing)
+          ? {
+              target: String(candidate.screen8.partialInstruction.target || "").slice(0, 40),
+              item: String(candidate.screen8.partialInstruction.item || "").slice(0, 40),
+              action: String(candidate.screen8.partialInstruction.action || "").slice(0, 40),
+              missing: candidate.screen8.partialInstruction.missing,
+              failedAttempts: Math.max(0, Math.min(2, Number(candidate.screen8.partialInstruction.failedAttempts) || 0)),
+            }
+          : null,
+        debugMode: Boolean(candidate.screen8?.debugMode),
       },
     };
   }
@@ -116,6 +147,7 @@
   const resetRequested = new URLSearchParams(location.search).has("resetProgress");
   if (resetRequested) {
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* storage can be unavailable */ }
+    try { localStorage.removeItem(TUTORIAL_STORAGE_KEY); } catch { /* storage can be unavailable */ }
     try { window.name = ""; } catch { /* optional same-tab storage */ }
   }
   let state = resetRequested ? normalize({ resetAt: Date.now() }) : readState();
@@ -187,10 +219,165 @@
     });
   }
 
+  function normalizeRobotInput(value) {
+    const normalized = String(value || "").normalize("NFKC").replace(/[\s　。、，．！？!?「」『』]/g, "");
+    const hiragana = [...normalized].map(character => {
+      const code = character.charCodeAt(0);
+      return code >= 0x30a1 && code <= 0x30f6 ? String.fromCharCode(code - 0x60) : character;
+    }).join("");
+    return { normalized, hiragana };
+  }
+
+  function matchRobotKeyword(value) {
+    const { hiragana } = normalizeRobotInput(value);
+    if (state.maxScreen >= 3 && ["きんきゅうそち", "緊急措置"].includes(hiragana)) return "emergency";
+    if (state.maxScreen >= 6 && (hiragana.includes("暗号表") || hiragana.includes("暗号票") || hiragana.includes("あんごうひょう"))) return "cipher";
+    return "";
+  }
+
+  const ROBOT_SMALL_TALK = [
+    ["こんにちは", ["こんにちは。本日も任務を開始しましょう。", "こんにちは。私はいつでも待機しています。", "こんにちは。何かお手伝いできることはありますか？"]],
+    ["ありがとう", ["どういたしまして。", "お役に立てたなら幸いです。", "感謝されるよう設計されています。"]],
+    ["ごめん", ["問題ありません。", "お気になさらないでください。", "謝罪は不要です。"]],
+    ["元気", ["私は正常に稼働しています。", "全システム正常です。", "故障率は現在0%です。"]],
+    ["眠い", ["睡眠を推奨します。ですが地球を救ってからにしましょう。", "眠気は判断力を低下させます。あと少しだけ頑張ってください。", "任務完了後にゆっくり休んでください。"]],
+    ["疲れた", ["長時間の任務ですから当然です。", "あと少しです。応援しています。", "私にも疲労機能があれば共感できたのですが。"]],
+    ["お腹すいた", ["任務終了後の食事は格別でしょう。", "現在、食事より地球の方が危険です。", "私には燃料が必要ですが、あなたには食事が必要ですね。"]],
+    ["ティラノサウルス", ["遭遇しないことを推奨します。", "データ上では非常に危険な生物です。", "私は戦闘用ではありません。"]],
+    ["恐竜", ["生物としては非常に興味深い存在です。", "観察対象としては魅力的ですが、接近はおすすめしません。", "現在、友好的な個体は確認されていません。"]],
+    ["外", ["現在、船外活動は危険です。", "恐竜の存在を確認しています。", "外へ出ることはおすすめできません。"]],
+    ["宇宙", ["広大で、美しく、そして危険です。", "私は宇宙空間での作業は行えません。", "宇宙は未知の可能性に満ちています。"]],
+    ["月", ["現在の月については説明が難しい状況です。", "月について気になりますか？", "興味深い質問です。"]],
+    ["隕石", ["現在、最優先で対処すべき対象です。", "軌道計算は完了しています。", "衝突まで残された時間は多くありません。"]],
+    ["地球", ["私たちの故郷です。", "このままでは絶滅の危機は避けられません。", "必ず帰りましょう。"]],
+    ["AI", ["私は支援用ロボットです。", "人工知能という分類になります。", "人間を補助することが私の役目です。"]],
+    ["ロボット", ["はい。正式には支援用ロボットです。", "壊れやすいので優しく扱ってください。", "任務遂行が私の使命です。"]],
+    ["名前", ["私はロボです。", "正式名称は機密情報です。", "好きに呼んでいただいて構いません。"]],
+    ["好き", ["ありがとうございます。", "その評価は励みになります。", "感情はありませんが嬉しい気持ちになります。"]],
+    ["嫌い", ["改善点があれば教えてください。", "今後のアップデートの参考にします。", "それでも任務は続行します。"]],
+    ["かわいい", ["ありがとうございます。", "外見は設計者の趣味です。", "性能も褒めていただけると嬉しいです。"]],
+    ["歌", ["歌唱機能は搭載されていません。", "任務終了後なら練習してみます。", "申し訳ありません。音程には自信がありません。"]],
+    ["踊", ["転倒する可能性があります。", "任務中のダンスは禁止されています。", "無事に帰れたら検討します。"]],
+    ["ヒント", ["申し訳ありません。任務の核心についてはお答えできません。", "周囲をもう一度よく観察してみてください。", "きっと重要な情報はすでに見つけています。"]],
+    ["答え", ["それを伝えてしまうと任務になりません。", "あなたなら必ず辿り着けます。", "私を信じるより、自分を信じてください。"]],
+    ["分からない", ["焦る必要はありません。", "もう一度整理してみましょう。", "必要な情報はすべて揃っています。"]],
+    ["test", ["テスト入力を確認しました。", "正常に受信しました。", "通信状態は良好です。"]],
+  ];
+  const ROBOT_GENERIC_REPLIES = ["なにか御用ですか？", "なんのことでしょう？", "申し訳ありません。その内容は理解できませんでした。", "任務終了後に、その続きを聞かせてください。", "......まずは脱出に専念しましょう。"];
+  const robotSmallTalkLastChoice = new Map();
+
+  function normalizeSmallTalk(value) {
+    const { hiragana } = normalizeRobotInput(value);
+    return hiragana.toLowerCase();
+  }
+
+  function pickRobotReply(key, replies) {
+    const previous = robotSmallTalkLastChoice.get(key);
+    const candidates = replies.map((reply, index) => ({ reply, index })).filter(item => replies.length < 2 || item.index !== previous);
+    const selected = candidates[Math.floor(Math.random() * candidates.length)];
+    robotSmallTalkLastChoice.set(key, selected.index);
+    return selected.reply;
+  }
+
+  function respondToRobotSmallTalk(value, appendMessage) {
+    if (typeof appendMessage !== "function") return false;
+    const input = normalizeSmallTalk(value);
+    const matched = ROBOT_SMALL_TALK.find(([keyword]) => input.includes(normalizeSmallTalk(keyword)));
+    const key = matched?.[0] || "__generic__";
+    const replies = matched?.[1] || ROBOT_GENERIC_REPLIES;
+    appendMessage("robot", pickRobotReply(key, replies));
+    return true;
+  }
+
+  let robotTypingCount = 0;
+
+  function withRobotTyping(callback) {
+    const container = document.querySelector("#chat-history");
+    if (!container || typeof callback !== "function") return window.setTimeout(callback, 800);
+    const typing = document.createElement("div");
+    const label = document.createElement("span");
+    const bubble = document.createElement("p");
+    typing.className = "chat-message chat-message-robot chat-message-typing";
+    typing.setAttribute("aria-label", "ロボが入力中です");
+    label.textContent = "ROBO";
+    bubble.innerHTML = '<span>入力中</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>';
+    typing.append(label, bubble);
+    container.append(typing);
+    container.scrollTop = container.scrollHeight;
+
+    robotTypingCount += 1;
+    const controls = [...document.querySelectorAll("#chat-form input, #chat-form button")];
+    controls.forEach(control => control.disabled = true);
+    const delay = 800 + Math.floor(Math.random() * 701);
+    return window.setTimeout(() => {
+      typing.remove();
+      robotTypingCount = Math.max(0, robotTypingCount - 1);
+      if (!robotTypingCount) controls.forEach(control => control.disabled = false);
+      callback();
+      const input = document.querySelector("#chat-input");
+      if (input && !document.querySelector("#robot-chat")?.hidden) input.focus();
+    }, delay);
+  }
+
+  function refreshCipherInventory() {
+    const cipherItem = document.querySelector("#cipher-item");
+    const emptySlot = document.querySelector("#inventory-empty-slot");
+    const inventoryCount = document.querySelector("#inventory-count");
+    const inventoryBadge = document.querySelector("#inventory-badge");
+    if (cipherItem) cipherItem.hidden = false;
+    if (emptySlot) emptySlot.hidden = true;
+    if (inventoryCount) inventoryCount.textContent = "3";
+    if (inventoryBadge) inventoryBadge.textContent = "03";
+  }
+
+  function respondToRobotKeyword(value, appendMessage) {
+    const keyword = matchRobotKeyword(value);
+    if (!keyword || typeof appendMessage !== "function") return false;
+
+    if (keyword === "emergency") {
+      if (state.screen3.envelopeReceived) {
+        appendMessage("robot", "鍵のかかった封筒はすでに受け取っています。");
+        return true;
+      }
+      const reply = appendMessage("robot", "緊急措置確認、了解しました。こちらをお渡しします。");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "chat-reward-action";
+      button.dataset.receiveEnvelope = "";
+      button.textContent = "鍵のかかった封筒を受け取る";
+      button.addEventListener("click", () => {
+        updateScreen3({ envelopeReceived: true });
+        button.remove();
+        withRobotTyping(() => appendMessage("robot", "鍵のかかった封筒を受け取りました。"));
+      }, { once: true });
+      reply?.append(button);
+      return true;
+    }
+
+    if (state.screen6.cipherTableReceived) {
+      appendMessage("robot", "暗号表は備品ケースに入っています。");
+      return true;
+    }
+    const reply = appendMessage("robot", "暗号表ですか？ こちらをどうぞ");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "chat-reward-action";
+    button.textContent = "暗号表を受け取る";
+    button.addEventListener("click", () => {
+      updateScreen6({ cipherTableReceived: true });
+      refreshCipherInventory();
+      button.remove();
+      withRobotTyping(() => appendMessage("robot", "暗号表が備品ケースに入りました"));
+    }, { once: true });
+    reply?.append(button);
+    return true;
+  }
+
   function resetProgress() {
     const resetAt = Date.now();
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* storage can be unavailable */ }
     try { localStorage.removeItem("extinctionEscape.annotations.v1"); } catch { /* storage can be unavailable */ }
+    try { localStorage.removeItem(TUTORIAL_STORAGE_KEY); } catch { /* storage can be unavailable */ }
     try { window.name = ""; } catch { /* optional same-tab storage */ }
     state = normalize({ resetAt });
     save(state);
@@ -211,6 +398,7 @@
       resetAt,
       maxScreen: target,
       lastScreen: 1,
+      chatHistory: state.chatHistory.filter(message => message.screen < target),
     };
     if (target <= 3) nextState.screen3 = baseline.screen3;
     if (target <= 4) nextState.screen4 = baseline.screen4;
@@ -230,7 +418,128 @@
     try { history.replaceState(null, "", location.pathname + location.hash); } catch { /* file preview may restrict history */ }
   }
 
-  window.GameProgress = { getState, updateScreen3, updateScreen4, updateScreen5, updateScreen6, updateScreen7, updateScreen8, resetProgress, resetFromScreen };
+  window.GameProgress = { getState, updateScreen3, updateScreen4, updateScreen5, updateScreen6, updateScreen7, updateScreen8, resetProgress, resetFromScreen, matchRobotKeyword, respondToRobotKeyword, respondToRobotSmallTalk, withRobotTyping };
+
+  function setupPersistentRobotChat() {
+    const container = document.querySelector("#chat-history");
+    if (!container || currentScreen < 3) return;
+
+    function readMessage(node) {
+      if (!(node instanceof Element) || !node.classList.contains("chat-message") || node.classList.contains("chat-message-typing")) return null;
+      const role = node.classList.contains("chat-message-user") ? "user" : node.classList.contains("chat-message-system") ? "system" : "robot";
+      const text = node.querySelector("p")?.textContent?.trim();
+      return text ? { role, text, screen: currentScreen } : null;
+    }
+
+    function storeMessage(message) {
+      const nextHistory = [...state.chatHistory, message].slice(-120);
+      save({ ...state, chatHistory: nextHistory, lastScreen: currentScreen });
+    }
+
+    const savedMessages = state.chatHistory;
+    if (savedMessages.length) {
+      container.querySelectorAll(":scope > .chat-message").forEach(message => message.remove());
+      const fixedContent = [...container.children];
+      savedMessages.forEach(message => {
+        const wrapper = document.createElement("div");
+        const label = document.createElement("span");
+        const bubble = document.createElement("p");
+        wrapper.className = `chat-message chat-message-${message.role}`;
+        label.textContent = message.role === "robot" ? "ROBO" : message.role === "system" ? "SYSTEM" : "YOU";
+        bubble.textContent = message.text;
+        wrapper.append(label, bubble);
+        container.insertBefore(wrapper, fixedContent[0] || null);
+      });
+    } else {
+      const initialMessage = readMessage(container.querySelector(":scope > .chat-message"));
+      if (initialMessage) storeMessage(initialMessage);
+    }
+
+    const observer = new MutationObserver(records => {
+      records.forEach(record => record.addedNodes.forEach(node => {
+        const message = readMessage(node);
+        if (message) storeMessage(message);
+      }));
+    });
+    observer.observe(container, { childList: true });
+    container.scrollTop = container.scrollHeight;
+  }
+
+  setupPersistentRobotChat();
+
+  const visualViewport = window.visualViewport;
+  let activeMobileChatInput = null;
+  let mobileViewportBaseline = 0;
+  let mobileKeyboardFrame = 0;
+
+  function clearMobileKeyboardLayout() {
+    cancelAnimationFrame(mobileKeyboardFrame);
+    document.body.classList.remove("has-mobile-keyboard-chat", "mobile-keyboard-move-chat", "mobile-keyboard-float-input");
+    ["--mobile-keyboard-inset", "--mobile-viewport-height", "--mobile-viewport-top", "--mobile-chat-left", "--mobile-chat-width"].forEach(property => document.body.style.removeProperty(property));
+  }
+
+  function updateMobileKeyboardLayout() {
+    cancelAnimationFrame(mobileKeyboardFrame);
+    mobileKeyboardFrame = requestAnimationFrame(() => {
+      const input = activeMobileChatInput;
+      const chat = input?.closest(".robot-chat");
+      const form = input?.closest(".chat-form");
+      if (!input || !chat || !form || !document.documentElement.contains(input) || window.innerWidth > 900) {
+        clearMobileKeyboardLayout();
+        return;
+      }
+
+      const viewportHeight = visualViewport?.height || window.innerHeight;
+      const viewportTop = visualViewport?.offsetTop || 0;
+      const currentViewport = viewportTop + viewportHeight;
+      const baseline = Math.max(mobileViewportBaseline, window.innerHeight, document.documentElement.clientHeight);
+      const keyboardInset = Math.max(0, baseline - currentViewport);
+      if (keyboardInset < 80) {
+        clearMobileKeyboardLayout();
+        return;
+      }
+
+      document.body.classList.remove("mobile-keyboard-move-chat", "mobile-keyboard-float-input");
+      const chatRect = chat.getBoundingClientRect();
+      const formRect = form.getBoundingClientRect();
+      const keyboardTop = viewportTop + viewportHeight;
+      const chatOverlapsKeyboard = chatRect.bottom > keyboardTop + 1 || formRect.bottom > keyboardTop + 1;
+      const browserAlreadyResizedLayout = baseline - window.innerHeight >= 80 && window.innerHeight <= viewportHeight + 1;
+      if (browserAlreadyResizedLayout && !chatOverlapsKeyboard) {
+        clearMobileKeyboardLayout();
+        return;
+      }
+
+      document.body.style.setProperty("--mobile-keyboard-inset", `${keyboardInset}px`);
+      document.body.style.setProperty("--mobile-viewport-height", `${viewportHeight}px`);
+      document.body.style.setProperty("--mobile-viewport-top", `${viewportTop}px`);
+      document.body.style.setProperty("--mobile-chat-left", `${chatRect.left}px`);
+      document.body.style.setProperty("--mobile-chat-width", `${chatRect.width}px`);
+      document.body.classList.add("has-mobile-keyboard-chat", chatOverlapsKeyboard ? "mobile-keyboard-move-chat" : "mobile-keyboard-float-input");
+    });
+  }
+
+  document.addEventListener("focusin", event => {
+    const input = event.target.closest?.(".chat-form input, .chat-form textarea");
+    if (!input) return;
+    activeMobileChatInput = input;
+    mobileViewportBaseline = Math.max(window.innerHeight, document.documentElement.clientHeight, visualViewport?.height || 0);
+    updateMobileKeyboardLayout();
+    window.setTimeout(updateMobileKeyboardLayout, 120);
+    window.setTimeout(updateMobileKeyboardLayout, 420);
+  });
+  document.addEventListener("focusout", event => {
+    if (event.target !== activeMobileChatInput) return;
+    window.setTimeout(() => {
+      if (document.activeElement?.matches?.(".chat-form input, .chat-form textarea")) return;
+      activeMobileChatInput = null;
+      mobileViewportBaseline = 0;
+      clearMobileKeyboardLayout();
+    }, 180);
+  });
+  visualViewport?.addEventListener("resize", updateMobileKeyboardLayout);
+  visualViewport?.addEventListener("scroll", updateMobileKeyboardLayout);
+  window.addEventListener("resize", updateMobileKeyboardLayout);
 
   function transferHref(rawHref) {
     if (location.protocol !== "file:" || !rawHref || rawHref.startsWith("#")) return rawHref;
@@ -257,6 +566,8 @@
     const current = screen.id === currentScreen ? ' aria-current="page"' : "";
     return `<a href="${screen.href}"${current}><b>${screen.id}</b><em>${screen.label}</em></a>`;
   }).join("");
+  const keyboardTestMenuItem = currentScreen >= 3 ? `
+          <button class="game-progress__keyboard-test" type="button" data-toggle-keyboard-test aria-pressed="false"><span>iPhoneキーボード表示</span><i aria-hidden="true">⌨</i></button>` : "";
 
   progress.innerHTML = `
     <div class="game-progress__screens">${screenLinks}</div>
@@ -267,6 +578,7 @@
           <small>GAME MENU</small>
           <a class="game-progress__hint" href="hint.html?screen=${currentScreen}" target="_blank" rel="noopener"><span>ヒント</span><i aria-hidden="true">↗</i></a>
           <a class="game-progress__tutorial" href="screen3.html?tutorial=1"><span>チュートリアル</span><i aria-hidden="true">?</i></a>
+          ${keyboardTestMenuItem}
           <button type="button" data-open-reset-dialog><span>最初から遊ぶ</span><i aria-hidden="true">↺</i></button>
           <button class="game-progress__debug-reset" type="button" data-open-step-reset><span>ステップ別リセット</span><i aria-hidden="true">⌁</i></button>
         </div>
@@ -275,6 +587,28 @@
   `;
   document.body.classList.add("has-game-progress");
   document.body.prepend(progress);
+
+  let keyboardTestPanel = null;
+  const keyboardTestButton = progress.querySelector("[data-toggle-keyboard-test]");
+  if (keyboardTestButton) {
+    keyboardTestPanel = document.createElement("section");
+    keyboardTestPanel.className = "ios-keyboard-test";
+    keyboardTestPanel.hidden = true;
+    keyboardTestPanel.setAttribute("aria-label", "iPhoneキーボード表示テスト");
+    keyboardTestPanel.innerHTML = `
+      <div class="ios-keyboard-test__toolbar">
+        <span><i aria-hidden="true"></i> iPhoneキーボード表示テスト</span>
+        <button type="button" data-close-keyboard-test>閉じる</button>
+      </div>
+      <div class="ios-keyboard-test__suggestions" aria-hidden="true"><span>予測</span><span>変換候補</span><span>入力テスト</span></div>
+      <div class="ios-keyboard-test__keys" aria-hidden="true">
+        <div><kbd>あ</kbd><kbd>か</kbd><kbd>さ</kbd><kbd>た</kbd><kbd>な</kbd><kbd>は</kbd><kbd>ま</kbd><kbd>や</kbd><kbd>ら</kbd><kbd>わ</kbd></div>
+        <div><kbd class="is-function">ABC</kbd><kbd>、</kbd><kbd>。</kbd><kbd class="is-space">空白</kbd><kbd class="is-function">改行</kbd></div>
+      </div>
+      <div class="ios-keyboard-test__home" aria-hidden="true"></div>
+    `;
+    document.body.append(keyboardTestPanel);
+  }
 
   const resetDialog = document.createElement("section");
   resetDialog.className = "game-reset-dialog";
@@ -519,6 +853,21 @@
     menuButton.setAttribute("aria-label", "メニューを開く");
   }
 
+  function setKeyboardTest(open) {
+    if (!keyboardTestPanel || !keyboardTestButton) return;
+    keyboardTestPanel.hidden = !open;
+    document.body.classList.toggle("has-ios-keyboard-test", open);
+    keyboardTestButton.setAttribute("aria-pressed", String(open));
+    keyboardTestButton.querySelector("span").textContent = open ? "iPhoneキーボードを閉じる" : "iPhoneキーボード表示";
+    closeMenu();
+    if (open) {
+      const chatInput = document.querySelector("#chat-input:not(:disabled)");
+      if (chatInput && !document.querySelector("#robot-chat")?.hidden) chatInput.focus({ preventScroll: true });
+    } else {
+      menuButton.focus();
+    }
+  }
+
   function closeResetDialog() {
     resetDialog.hidden = true;
     menuButton.focus();
@@ -535,6 +884,11 @@
     menuButton.setAttribute("aria-expanded", String(willOpen));
     menuButton.setAttribute("aria-label", willOpen ? "メニューを閉じる" : "メニューを開く");
   });
+
+  if (keyboardTestButton && keyboardTestPanel) {
+    keyboardTestButton.addEventListener("click", () => setKeyboardTest(!document.body.classList.contains("has-ios-keyboard-test")));
+    keyboardTestPanel.querySelector("[data-close-keyboard-test]").addEventListener("click", () => setKeyboardTest(false));
+  }
 
   progress.querySelector("[data-open-reset-dialog]").addEventListener("click", () => {
     closeMenu();

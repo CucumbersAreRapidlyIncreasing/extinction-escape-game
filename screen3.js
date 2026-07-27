@@ -227,6 +227,7 @@
     }
     chatHistory.append(wrapper);
     chatHistory.scrollTop = chatHistory.scrollHeight;
+    return wrapper;
   }
 
   document.querySelector("#chat-form").addEventListener("submit", event => {
@@ -237,14 +238,14 @@
     chatInput.value = "";
     const normalized = normalizeAnswer(raw);
     const rule = (CHAT_RULES[context] || []).find(item => item.answers.some(answer => normalizeAnswer(answer) === normalized));
-    window.setTimeout(() => {
+    window.GameProgress.withRobotTyping(() => {
+      if (window.GameProgress?.respondToRobotKeyword(raw, appendMessage)) return;
       if (rule) {
         appendMessage("robot", rule.response, { nextLabel: rule.nextLabel });
       } else {
-        appendMessage("robot", DEFAULT_REPLIES[defaultReplyIndex % DEFAULT_REPLIES.length]);
-        defaultReplyIndex += 1;
+        window.GameProgress?.respondToRobotSmallTalk(raw, appendMessage);
       }
-    }, 320);
+    });
   });
 
   chatHistory.addEventListener("click", event => {

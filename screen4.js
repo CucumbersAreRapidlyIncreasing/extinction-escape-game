@@ -73,6 +73,7 @@
     wrapper.append(label, bubble);
     chatHistory.append(wrapper);
     chatHistory.scrollTop = chatHistory.scrollHeight;
+    return wrapper;
   }
 
   document.querySelector("#chat-form").addEventListener("submit", event => {
@@ -81,10 +82,10 @@
     if (!value) return;
     appendMessage("user", value);
     chatInput.value = "";
-    window.setTimeout(() => {
-      appendMessage("robot", replies[defaultReplyIndex % replies.length]);
-      defaultReplyIndex += 1;
-    }, 320);
+    window.GameProgress.withRobotTyping(() => {
+      if (window.GameProgress?.respondToRobotKeyword(value, appendMessage)) return;
+      window.GameProgress?.respondToRobotSmallTalk(value, appendMessage);
+    });
   });
 
   function openLightbox(button) {

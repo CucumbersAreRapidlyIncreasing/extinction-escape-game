@@ -39,7 +39,12 @@
     {
       selector: ".robot-launch",
       title: "ロボボタン",
-      description: "ロボとコミュニケーションを取ることができます。謎の答えや、気になった言葉を入力してみてください。このチュートリアルはメニューから再度確認することができます。",
+      description: "ロボとコミュニケーションを取ることができます。謎の答えや、気になった言葉を入力してみてください。",
+    },
+    {
+      selector: ".game-progress__menu-button",
+      title: "チュートリアルをもう一度見る",
+      description: "このチュートリアルはメニューボタンからも再度確認することができます。",
     },
   ].filter(step => !step.selector || document.querySelector(step.selector));
 

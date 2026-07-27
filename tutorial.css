@@ -182,9 +182,10 @@ body.screen-tutorial-open { overflow: hidden; }
 @media (max-width: 620px) {
   .screen-tutorial__card { padding: 20px; }
   .screen-tutorial__description { min-height: 0; margin-block: 13px 16px; line-height: 1.65; }
-  .screen-tutorial__actions { grid-template-columns: auto 1fr; }
+  .screen-tutorial__actions { grid-template-columns: 1fr 1fr; }
+  .screen-tutorial__actions .screen-tutorial__back { grid-column: 1; grid-row: 1; }
+  .screen-tutorial__actions .screen-tutorial__next { grid-column: 2; grid-row: 1; min-width: 0; }
   .screen-tutorial__actions .screen-tutorial__skip { grid-column: 1 / -1; grid-row: 2; min-height: 32px; }
-  .screen-tutorial__actions .screen-tutorial__next { min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
