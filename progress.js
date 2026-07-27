@@ -566,9 +566,6 @@
     const current = screen.id === currentScreen ? ' aria-current="page"' : "";
     return `<a href="${screen.href}"${current}><b>${screen.id}</b><em>${screen.label}</em></a>`;
   }).join("");
-  const keyboardTestMenuItem = currentScreen >= 3 ? `
-          <button class="game-progress__keyboard-test" type="button" data-toggle-keyboard-test aria-pressed="false"><span>iPhoneキーボード表示</span><i aria-hidden="true">⌨</i></button>` : "";
-
   progress.innerHTML = `
     <div class="game-progress__screens">${screenLinks}</div>
     <div class="game-progress__tools">
@@ -576,9 +573,8 @@
         <button class="game-progress__menu-button" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="game-progress-menu-panel"><i></i><i></i><i></i></button>
         <div class="game-progress__menu-panel" id="game-progress-menu-panel" hidden>
           <small>GAME MENU</small>
-          <a class="game-progress__hint" href="hint.html?screen=${currentScreen}" target="_blank" rel="noopener"><span>ヒント</span><i aria-hidden="true">↗</i></a>
+          <button class="game-progress__hint" type="button" data-open-hint><span>ヒント</span><i aria-hidden="true">?</i></button>
           <a class="game-progress__tutorial" href="screen3.html?tutorial=1"><span>チュートリアル</span><i aria-hidden="true">?</i></a>
-          ${keyboardTestMenuItem}
           <button type="button" data-open-reset-dialog><span>最初から遊ぶ</span><i aria-hidden="true">↺</i></button>
           <button class="game-progress__debug-reset" type="button" data-open-step-reset><span>ステップ別リセット</span><i aria-hidden="true">⌁</i></button>
         </div>
@@ -588,27 +584,72 @@
   document.body.classList.add("has-game-progress");
   document.body.prepend(progress);
 
-  let keyboardTestPanel = null;
-  const keyboardTestButton = progress.querySelector("[data-toggle-keyboard-test]");
-  if (keyboardTestButton) {
-    keyboardTestPanel = document.createElement("section");
-    keyboardTestPanel.className = "ios-keyboard-test";
-    keyboardTestPanel.hidden = true;
-    keyboardTestPanel.setAttribute("aria-label", "iPhoneキーボード表示テスト");
-    keyboardTestPanel.innerHTML = `
-      <div class="ios-keyboard-test__toolbar">
-        <span><i aria-hidden="true"></i> iPhoneキーボード表示テスト</span>
-        <button type="button" data-close-keyboard-test>閉じる</button>
-      </div>
-      <div class="ios-keyboard-test__suggestions" aria-hidden="true"><span>予測</span><span>変換候補</span><span>入力テスト</span></div>
-      <div class="ios-keyboard-test__keys" aria-hidden="true">
-        <div><kbd>あ</kbd><kbd>か</kbd><kbd>さ</kbd><kbd>た</kbd><kbd>な</kbd><kbd>は</kbd><kbd>ま</kbd><kbd>や</kbd><kbd>ら</kbd><kbd>わ</kbd></div>
-        <div><kbd class="is-function">ABC</kbd><kbd>、</kbd><kbd>。</kbd><kbd class="is-space">空白</kbd><kbd class="is-function">改行</kbd></div>
-      </div>
-      <div class="ios-keyboard-test__home" aria-hidden="true"></div>
-    `;
-    document.body.append(keyboardTestPanel);
+  function createHintTrail(topic, hintCount) {
+    let next = {
+      title: "答え",
+      type: "answer",
+      content: `${topic}の答えをここに追加します。現在はダミー表示です。`,
+      children: [],
+    };
+    for (let number = hintCount; number >= 1; number -= 1) {
+      next = {
+        title: `第${number}ヒント`,
+        type: "hint",
+        content: `${topic}の第${number}ヒントをここに追加します。現在はダミー表示です。`,
+        children: [next],
+      };
+    }
+    return [next];
   }
+
+  const remainingPuzzleHintTopics = [
+    ...["A", "B", "C", "D", "E", "F", "G"].map(label => ({
+      title: `${label}の謎`,
+      type: "topic",
+      content: `${label}の謎について、必要なところまで順番にヒントを確認できます。`,
+      children: createHintTrail(`${label}の謎`, 2),
+    })),
+    {
+      title: "解答欄を埋めたら",
+      type: "topic",
+      content: "解答欄を埋めた後の手順について、ヒントを順番に確認できます。",
+      children: createHintTrail("解答欄を埋めた後", 1),
+    },
+    {
+      title: "鍵のかかった封筒",
+      type: "topic",
+      content: "鍵のかかった封筒について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail("鍵のかかった封筒", 3),
+    },
+  ];
+  const hintTree = {
+    title: "ヒント一覧",
+    type: "root",
+    content: "確認したいカテゴリーを選択してください。ヒントと答えは段階的に表示されます。",
+    children: [{
+      title: "残された7つの謎",
+      type: "category",
+      content: "A〜Gの謎、解答欄、鍵のかかった封筒のヒントを確認できます。",
+      children: remainingPuzzleHintTopics,
+    }],
+  };
+  const hintDialog = document.createElement("section");
+  hintDialog.className = "game-hint-dialog";
+  hintDialog.hidden = true;
+  hintDialog.innerHTML = `
+    <button class="game-hint-dialog__backdrop" type="button" data-close-hint aria-label="ヒントを閉じる"></button>
+    <div class="game-hint-dialog__window" role="dialog" aria-modal="true" aria-labelledby="game-hint-title" aria-describedby="game-hint-description">
+      <header>
+        <div><small>COMMON SUPPORT ARCHIVE</small><h2 id="game-hint-title">ヒント一覧</h2></div>
+        <button type="button" data-close-hint aria-label="ヒントを閉じる">×</button>
+      </header>
+      <div class="game-hint-dialog__content" id="game-hint-description" tabindex="0">
+        <p class="game-hint-dialog__status"><i aria-hidden="true"></i> HINT TERMINAL</p>
+      </div>
+      <footer><button type="button" data-close-hint><span>ゲームに戻る</span><i aria-hidden="true">←</i></button></footer>
+    </div>
+  `;
+  document.body.append(hintDialog);
 
   const resetDialog = document.createElement("section");
   resetDialog.className = "game-reset-dialog";
@@ -711,6 +752,11 @@
 
   const menuButton = progress.querySelector(".game-progress__menu-button");
   const menuPanel = progress.querySelector(".game-progress__menu-panel");
+  const hintButton = progress.querySelector("[data-open-hint]");
+  const hintWindow = hintDialog.querySelector(".game-hint-dialog__window");
+  const hintTitle = hintDialog.querySelector("#game-hint-title");
+  const hintContent = hintDialog.querySelector(".game-hint-dialog__content");
+  const hintPath = [hintTree];
   const cancelResetButton = resetDialog.querySelector(".game-reset-dialog__window [data-cancel-reset]");
   const cancelStepResetButton = stepResetDialog.querySelector(".game-step-reset-dialog__window [data-cancel-step-reset]");
 
@@ -853,19 +899,43 @@
     menuButton.setAttribute("aria-label", "メニューを開く");
   }
 
-  function setKeyboardTest(open) {
-    if (!keyboardTestPanel || !keyboardTestButton) return;
-    keyboardTestPanel.hidden = !open;
-    document.body.classList.toggle("has-ios-keyboard-test", open);
-    keyboardTestButton.setAttribute("aria-pressed", String(open));
-    keyboardTestButton.querySelector("span").textContent = open ? "iPhoneキーボードを閉じる" : "iPhoneキーボード表示";
+  function renderHintNode() {
+    const node = hintPath[hintPath.length - 1];
+    const breadcrumbs = hintPath.map(item => item.title).join(" / ");
+    hintTitle.textContent = node.title;
+    hintContent.innerHTML = `
+      <p class="game-hint-dialog__status"><i aria-hidden="true"></i> HINT TERMINAL</p>
+      <nav class="game-hint-dialog__breadcrumb" aria-label="現在のヒント階層">${breadcrumbs}</nav>
+      <section class="game-hint-dialog__node game-hint-dialog__node--${node.type}">
+        <span>${node.type === "answer" ? "ANSWER DATA" : "SUPPORT DATA"}</span>
+        <h3>${node.title}</h3>
+        <p>${node.content}</p>
+        ${node.type === "answer" ? '<small>答えの内容は現在ダミーです。</small>' : ""}
+      </section>
+      ${node.children.length ? `<div class="game-hint-dialog__items">${node.children.map((child, index) => `
+        <button type="button" data-hint-child="${index}">
+          <span><small>${child.type === "answer" ? "ANSWER" : child.type === "hint" ? "HINT" : "CATEGORY"}</small><b>${child.title}</b></span>
+          <i aria-hidden="true">→</i>
+        </button>`).join("")}</div>` : ""}
+      ${hintPath.length > 1 ? '<button class="game-hint-dialog__back" type="button" data-hint-back><i aria-hidden="true">←</i><span>ひとつ前に戻る</span></button>' : ""}
+    `;
+    hintContent.scrollTop = 0;
+  }
+
+  function openHintDialog() {
     closeMenu();
-    if (open) {
-      const chatInput = document.querySelector("#chat-input:not(:disabled)");
-      if (chatInput && !document.querySelector("#robot-chat")?.hidden) chatInput.focus({ preventScroll: true });
-    } else {
-      menuButton.focus();
-    }
+    hintPath.splice(1);
+    renderHintNode();
+    hintDialog.hidden = false;
+    document.body.classList.add("has-open-hint");
+    hintDialog.querySelector("header [data-close-hint]").focus();
+  }
+
+  function closeHintDialog() {
+    if (hintDialog.hidden) return;
+    hintDialog.hidden = true;
+    document.body.classList.remove("has-open-hint");
+    menuButton.focus();
   }
 
   function closeResetDialog() {
@@ -885,10 +955,34 @@
     menuButton.setAttribute("aria-label", willOpen ? "メニューを閉じる" : "メニューを開く");
   });
 
-  if (keyboardTestButton && keyboardTestPanel) {
-    keyboardTestButton.addEventListener("click", () => setKeyboardTest(!document.body.classList.contains("has-ios-keyboard-test")));
-    keyboardTestPanel.querySelector("[data-close-keyboard-test]").addEventListener("click", () => setKeyboardTest(false));
-  }
+  hintButton.addEventListener("click", openHintDialog);
+  hintContent.addEventListener("click", event => {
+    const childButton = event.target.closest("[data-hint-child]");
+    if (childButton) {
+      const node = hintPath[hintPath.length - 1];
+      const child = node.children[Number(childButton.dataset.hintChild)];
+      if (!child) return;
+      hintPath.push(child);
+      renderHintNode();
+      hintContent.focus({ preventScroll: true });
+      return;
+    }
+    if (event.target.closest("[data-hint-back]") && hintPath.length > 1) {
+      hintPath.pop();
+      renderHintNode();
+      hintContent.focus({ preventScroll: true });
+    }
+  });
+  hintDialog.querySelectorAll("[data-close-hint]").forEach(button => button.addEventListener("click", closeHintDialog));
+  hintWindow.addEventListener("keydown", event => {
+    if (event.key !== "Tab") return;
+    const focusable = [...hintWindow.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),[tabindex]:not([tabindex="-1"])')];
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
 
   progress.querySelector("[data-open-reset-dialog]").addEventListener("click", () => {
     closeMenu();
@@ -910,7 +1004,8 @@
   });
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
-    if (!stepResetDialog.hidden) closeStepResetDialog();
+    if (!hintDialog.hidden) closeHintDialog();
+    else if (!stepResetDialog.hidden) closeStepResetDialog();
     else if (!resetDialog.hidden) closeResetDialog();
     else closeMenu();
   });
