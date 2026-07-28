@@ -1,5 +1,7 @@
 (() => {
   "use strict";
+  // エンジン制御室の色ボタン入力と確認ダイアログを管理する。
+  // 正しい5色の並びが確定した時だけ、エンジン起動済みとして進行を保存する。
   const buttons = [...document.querySelectorAll("[data-color-index]")];
   const bank = document.querySelector("#color-button-bank");
   const selectionOutput = document.querySelector("#engine-selection");
@@ -38,6 +40,7 @@
     document.body.classList.remove("confirm-open");
   }
 
+  // 成功後は二重入力を防ぐため操作部品を無効化し、完了表示へ固定する。
   function showSuccess() {
     engineStarted = true;
     closeConfirmation();

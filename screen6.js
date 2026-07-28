@@ -1,5 +1,7 @@
 (() => {
   "use strict";
+  // 画面6の備品ケース、暗号表の受け取り、謎ブロックの盤面操作を管理する。
+  // ブロックは位置だけでなく各面の向きも保持し、転がした方向に応じて面を回転させる。
   const body=document.body,inventoryLayer=document.querySelector("#inventory-layer"),inventoryList=document.querySelector("#inventory-list"),inventoryDetails=[...document.querySelectorAll(".inventory-detail")],chatPanel=document.querySelector("#robot-chat"),chatInput=document.querySelector("#chat-input"),chatHistory=document.querySelector("#chat-history"),lightbox=document.querySelector("#image-lightbox"),lightboxImage=document.querySelector("#lightbox-image"),lightboxTitle=document.querySelector("#lightbox-title"),cipherItem=document.querySelector("#cipher-item"),inventoryCount=document.querySelector("#inventory-count"),emptySlot=document.querySelector("#inventory-empty-slot");
   let lastFocus=null,replyIndex=0,cipherTableReceived=Boolean(window.GameProgress?.getState().screen6.cipherTableReceived);const replies=["なんのことでしょう？","私にはわかりません。","タイムマシンの資料を確認してみてください。"];
   const lockPage=locked=>body.classList.toggle("modal-open",locked);
@@ -28,6 +30,7 @@
     {id:"west",yellow:false,n:[-1,0,0],a:[0,0,-1]},{id:"east",yellow:false,n:[1,0,0],a:[0,0,1]}
   ];
   let faces=initialFaces();
+  // 面の法線ベクトルと模様の向きを90度回転し、転がした後の上面を計算する。
   function rotateVector(vector,axis,quarter){const[x,y,z]=vector;if(axis==="x")return quarter>0?[x,-z,y]:[x,z,-y];return quarter>0?[z,y,-x]:[-z,y,x]}
   function rotateCube(axis,quarter){faces=faces.map(face=>({...face,n:rotateVector(face.n,axis,quarter),a:rotateVector(face.a,axis,quarter)}))}
   function renderCube(){cube.style.setProperty("--cube-row",row);cube.style.setProperty("--cube-col",col);const top=faces.find(face=>face.n[2]===1);cube.classList.toggle("is-yellow",top.yellow);const degrees=Math.round(Math.atan2(top.a[0],top.a[1])*180/Math.PI);cube.style.setProperty("--triangle-rotation",`${degrees}deg`);positionOutput.textContent=`配置：上から ${row+1} 行目・左から ${col+1} 列目`;rollButtons.forEach(button=>{const direction=button.dataset.roll;button.disabled=(direction==="up"&&row===0)||(direction==="down"&&row===6)||(direction==="left"&&col===0)||(direction==="right"&&col===6)})}

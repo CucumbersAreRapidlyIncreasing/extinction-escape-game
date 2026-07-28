@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  // 最終画面の進行制御。
+  // ロボットへの指示文解析 → 作業内容確認 → レバー操作 → エンディング分岐を管理する。
   const body = document.body;
   const initialState = window.GameProgress?.getState() || {};
   const savedScreen8 = initialState.screen8 || {};
@@ -62,6 +64,7 @@
     return wrapper;
   }
 
+  // 再読み込み後も会話・フォーム・レバー操作の途中から再開できるよう、変更のたびに保存する。
   function saveScreen8(patch = {}) {
     window.GameProgress?.updateScreen8({
       briefingStage: stage,
@@ -83,6 +86,7 @@
     chatForm.querySelector("button").disabled = !available;
   }
 
+  // 指示文の全角半角・空白・カナ表記を揃えてからキーワードを判定する。
   function normalize(value) {
     const compact = String(value || "").normalize("NFKC").replace(/[\s　。、，．！？!?「」『』・]/g, "").toLowerCase();
     return [...compact].map(character => {
@@ -99,6 +103,8 @@
     return includesAny(text, ["地球", "地面", "この星"]);
   }
 
+  // 自由入力された指示を「対象・使用物・動作」の3要素に分解する。
+  // 危険な対象や曖昧な動作も同時に検出し、専用の返答へ振り分ける。
   function analyzeEarthOrder(value) {
     const text = normalize(value);
     const targetTypes = [
@@ -118,6 +124,8 @@
     const matchedPen = penTypes.find(type => includesAny(text, type.words));
     const hasPen = Boolean(matchedPen);
     const hasGenericTimeMachine = includesAny(text, ["タイムマシン"]) && !hasSystem3;
+    const hasInstalledTimeMachine = includesAny(text, ["タイムマシン", "5号システム", "五号システム", "ごごうしすてむ"]);
+    const hasRemovalAction = includesAny(text, ["外す", "外して", "はずす", "はずして", "取り外す", "取り外して", "とりはずす", "とりはずして", "取る", "取って", "とる", "とって"]);
     const actionTypes = [
       { words: ["設置"], label: "設置" },
       { words: ["装着"], label: "装着" },
@@ -136,6 +144,8 @@
       itemLabel: hasSystem3 ? "3号システム" : matchedPen?.label || "",
       hasItem: hasSystem3 || hasPen,
       hasGenericTimeMachine,
+      hasInstalledTimeMachine,
+      hasRemovalAction,
       hasInstall,
       actionLabel: matchedAction?.label || "",
       hasWeakAction,
@@ -176,6 +186,7 @@
     form.querySelectorAll("input,button").forEach(control => control.disabled = locked);
   }
 
+  // 保存状態からフォーム表示と入力可否を復元する。デバッグ表示から戻る際にも共用する。
   function restoreNormalPanels() {
     workPanel.hidden = true;
     setFormLocked(workForm, workSubmitted || preparing || timeMachinePrepared);
@@ -193,6 +204,7 @@
     }
   }
 
+  // チャットを初めて開いた時だけ、最終判断の問いかけを遅延表示する。
   function askFinalQuestion() {
     if (timeMachinePrepared || preparing || stage === "choice") return;
     window.clearTimeout(introTimer);
@@ -227,6 +239,7 @@
     wrapper.append(controls);
   }
 
+  // 制作者向け確認モード。通常の進行データを退避して各状態の表示だけを試せるようにする。
   function startDebugMode() {
     if (debugMode) {
       addDebugControls();
@@ -304,11 +317,13 @@
       } else if (debugView.dataset.debugView === "complete") {
         engineButton.classList.add("is-true-ready");
         appendMessage("robot", `${EXECUTION_MESSAGE}\n\n無事作業を完了しました。`);
+        appendMessage("robot", "これで、隕石の衝突も回避できました。エンジンを起動して地球を脱出しましょう。");
       }
       return;
     }
   });
 
+  // 指示の3要素が揃ったら、ロボット作業の詳細確認フォームへ進める。
   function moveToWorkForm(messageText = WORK_MESSAGE) {
     setStage("work");
     window.GameProgress.withRobotTyping(() => {
@@ -345,6 +360,7 @@
     return "";
   }
 
+  // 一部だけ正しい指示を保持し、次の発言で不足要素だけを補足できるようにする。
   function setPartialInstruction(parts, failedAttempts = 0) {
     const missing = missingInstructionPart(parts);
     partialInstruction = missing ? { ...parts, missing, failedAttempts } : null;
@@ -363,6 +379,7 @@
   }
 
   function specialInstructionReply(order) {
+    if (order.hasInstalledTimeMachine && order.hasRemovalAction) return "宇宙船のタイムマシンを外すのですか？このタイムマシンは頑丈に取り付けられていて取り外すには1時間以上かかります。今は別の方法を考えましょう。";
     if (order.hasAsteroid) return "隕石ですか！？ それはさすがに無理ですよ。\n\n別の対象を指定してください。";
     if (order.hasGenericTimeMachine) return "5号システムなら宇宙船に設置済みですよ……\n\nそれとも別のタイムマシンがあるのですか？";
     if (order.hasWeakAction && !order.hasInstall) return "それでは意味がないのでは？\n\n必要な作業を、もう少し具体的に指示してください。";
@@ -390,6 +407,7 @@
     moveToWorkForm(DIRECT_WORK_MESSAGE);
   }
 
+  // 会話ステージごとに同じ入力を異なる意味で扱う、最終画面の中心となる分岐処理。
   chatForm.addEventListener("submit", event => {
     event.preventDefault();
     const value = chatInput.value.trim();
@@ -403,6 +421,25 @@
       }
       if (normalize(value) === normalize("デバッグモード終了")) {
         endDebugMode();
+        return;
+      }
+      const alwaysAvailableOrder = analyzeEarthOrder(value);
+      const isAlwaysAvailableOrder = alwaysAvailableOrder.hasEarth
+        && alwaysAvailableOrder.hasSystem3
+        && alwaysAvailableOrder.hasInstall
+        && !alwaysAvailableOrder.hasAsteroid
+        && !alwaysAvailableOrder.hasRemovalAction;
+      if (isAlwaysAvailableOrder) {
+        hideChoiceInput();
+        if (timeMachinePrepared) {
+          appendMessage("robot", "作業は完了しています。エンジンを起動してください。");
+          return;
+        }
+        if (preparing || stage === "executing") {
+          appendMessage("robot", "作業内容を確認済みです。現在、その内容で作業を実行しています。");
+          return;
+        }
+        advanceFromInstruction(instructionParts(alwaysAvailableOrder), Boolean(partialInstruction));
         return;
       }
       if (awaitingChoice) {
@@ -430,6 +467,7 @@
       if (window.GameProgress?.respondToRobotKeyword(value, appendMessage)) return;
       if (timeMachinePrepared && !debugMode) {
         if (normalize(value).includes(normalize("エンジン"))) appendMessage("robot", "作業は完了しています。エンジンを起動してください。");
+        else if (window.GameProgress?.respondToPostScanDiscovery(value, appendMessage)) return;
         else window.GameProgress?.respondToRobotSmallTalk(value, appendMessage);
         return;
       }
@@ -475,42 +513,26 @@
           appendMessage("robot", specialReply);
           return;
         }
-        const hasOperationContext = order.hasItem || order.hasGenericTimeMachine || order.hasInstall || order.hasWeakAction;
+        const partCount = instructionPartCount(parts);
+        const hasOperationContext = partCount > 0 || order.hasGenericTimeMachine || order.hasWeakAction;
         if (!hasOperationContext) {
+          if (!debugMode && window.GameProgress?.respondToPostScanDiscovery(value, appendMessage)) return;
           window.GameProgress?.respondToRobotSmallTalk(value, appendMessage);
           return;
         }
-        if (!order.hasItem && !order.hasInstall && !order.hasWeakAction) {
+        if (partCount <= 1) {
           appendMessage("robot", INSUFFICIENT_MESSAGE);
-          return;
-        }
-        if (!order.hasItem) {
-          appendMessage("robot", "何を設置するのでしょう？");
-          return;
-        }
-        if (order.hasSystem3 && !order.hasEarth && !order.hasInstall && !order.hasWeakAction) {
-          appendMessage("robot", "3号システムですか？\n\nたしか、それは旧型のタイムマシンです。\n\nそんなものが存在するのですか？");
-          return;
-        }
-        if (order.hasPen && !order.hasEarth && !order.hasInstall && !order.hasWeakAction) {
-          appendMessage("robot", `${order.penLabel}ですか？\n\nそれをいったいどう使うのでしょうか？`);
-          return;
-        }
-        if (!order.hasEarth) {
-          appendMessage("robot", "設置するには対象が必要です。どこに設置すればよいのでしょう？");
-          return;
-        }
-        if (!order.hasInstall) {
-          appendMessage("robot", "その機器を、どのように扱えばよいのでしょう？");
           return;
         }
         advanceFromInstruction(parts, false);
         return;
       }
       if (stage === "work") {
+        if (!debugMode && window.GameProgress?.respondToPostScanDiscovery(value, appendMessage)) return;
         window.GameProgress?.respondToRobotSmallTalk(value, appendMessage);
         return;
       }
+      if (!debugMode && ["executing", "complete"].includes(stage) && window.GameProgress?.respondToPostScanDiscovery(value, appendMessage)) return;
       window.GameProgress?.respondToRobotSmallTalk(value, appendMessage);
     });
   });
@@ -521,6 +543,7 @@
     if (!debugMode) saveScreen8();
   }));
 
+  // レバーの入力順を画面とhiddenフィールドの両方へ反映する。
   function renderSequence() {
     activeLever = sequence.at(-1) ?? null;
     leverButtons.forEach((button, index) => button.setAttribute("aria-pressed", String(index === activeLever)));
@@ -555,12 +578,14 @@
       workSubmitted = true;
       saveScreen8({ briefingStage: "complete", timeMachinePrepared: true, workSubmitted: true });
       appendMessage("robot", "無事作業を完了しました。");
+      appendMessage("robot", "これで、隕石の衝突も回避できました。エンジンを起動して地球を脱出しましょう。");
       workFeedback.textContent = "作業完了。エンジンを起動できます。";
       engineButton.classList.add("is-true-ready");
       setChatInputAvailable(true);
     });
   }
 
+  // 正しい作業内容が揃った後、演出を挟んでタイムマシン準備完了状態にする。
   function executeRobotOperation() {
     preparing = true;
     workSubmitted = true;
@@ -611,6 +636,7 @@
     engineButton.focus();
   }
   document.querySelectorAll("[data-engine-no]").forEach(button => button.addEventListener("click", closeEngineConfirm));
+  // 準備完了なら真エンド、それ以前の起動ならバッドエンドへ分岐する。
   document.querySelector("[data-engine-yes]").addEventListener("click", () => {
     const ending = timeMachinePrepared ? "true" : "bad";
     window.GameProgress?.updateScreen8({ engineStarted: true, ending });

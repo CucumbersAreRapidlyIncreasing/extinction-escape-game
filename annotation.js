@@ -1,6 +1,7 @@
 (() => {
   "use strict";
 
+  // 謎画像への手書きメモ機能。画像ごとの筆跡を保存し、通常表示と拡大表示で共有する。
   const STORAGE_KEY = "extinctionEscape.annotations.v1";
   const MAX_CANVAS_SIZE = 2200;
   const surfaces = new Set();
@@ -17,6 +18,7 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stored)); } catch (_) {}
   }
 
+  // 同じ画像を別の相対URLから開いても同じメモを参照できるよう、パスだけをキーにする。
   function imageKey(source) {
     if (!source) return "";
     try {
@@ -38,6 +40,7 @@
     return toolbar;
   }
 
+  // 1枚の画像に重なるcanvasとツールバーをひとまとめに管理する。
   class AnnotationSurface {
     constructor(image, stage, toolbar, source) {
       this.image = image;
@@ -151,6 +154,7 @@
       renderMatching(this.key, this);
     }
 
+    // 表示倍率が変わっても筆跡の位置がずれないよう、点は0〜1の相対座標で保持する。
     resizeAndRender() {
       if (!this.image.complete || !this.image.naturalWidth || !this.image.naturalHeight) return;
       const scale = Math.min(1, MAX_CANVAS_SIZE / Math.max(this.image.naturalWidth, this.image.naturalHeight));
@@ -191,6 +195,7 @@
     }
   }
 
+  // 同じ画像を開いている別ビュー（一覧／ライトボックス）にも変更を即時反映する。
   function renderMatching(key, excluded = null) {
     surfaces.forEach(surface => {
       if (surface !== excluded && surface.key === key) surface.render();

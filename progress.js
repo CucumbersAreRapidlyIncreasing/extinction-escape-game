@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  // ゲーム全体で共有する進行管理モジュール。
+  // 各画面の状態保存、ロボット会話、上部ナビゲーション、ヒント表示をこの1ファイルで担当する。
   const STORAGE_KEY = "extinctionEscape.progress.v1";
   const TUTORIAL_STORAGE_KEY = "extinctionEscape.screen3Tutorial.v1";
   const WINDOW_PREFIX = "EXTINCTION_ESCAPE_STATE:";
@@ -17,6 +19,7 @@
   ];
   const collisionMinutesByProgress = { 3: 50, 4: 40, 5: 30, 6: 20, 7: 10, 8: 10 };
 
+  // 保存データは手動編集や旧バージョンの値も入り得るため、利用前に型と範囲を必ず整える。
   function normalizeChatHistory(value) {
     if (!Array.isArray(value)) return [];
     return value.slice(-120).map(message => ({
@@ -28,6 +31,7 @@
 
   function normalize(candidate = {}) {
     const step = candidate.screen3 || {};
+    const screen7 = candidate.screen7 || {};
     return {
       version: 1,
       resetAt: Number(candidate.resetAt) || 0,
@@ -59,7 +63,14 @@
         cipherTableReceived: Boolean(candidate.screen6?.cipherTableReceived),
       },
       screen7: {
-        palmScanCompleted: Boolean(candidate.screen7?.palmScanCompleted),
+        palmScanCompleted: Boolean(screen7.palmScanCompleted),
+        chatStage: ["locked", "discovering", "resolved"].includes(screen7.chatStage)
+          ? screen7.chatStage
+          : (screen7.palmScanCompleted ? "discovering" : "locked"),
+        chatCounts: ["recognition", "hand", "dinosaur", "ancestor"].reduce((counts, key) => {
+          counts[key] = Math.max(0, Math.min(99, Number(screen7.chatCounts?.[key]) || 0));
+          return counts;
+        }, {}),
       },
       screen8: {
         timeMachinePrepared: Boolean(candidate.screen8?.timeMachinePrepared),
@@ -94,6 +105,7 @@
     try { return normalize(JSON.parse(value)); } catch { return null; }
   }
 
+  // file:// ではページ間でlocalStorageが共有されない環境があるため、URLにも状態を引き継ぐ。
   function readTransfer() {
     if (location.protocol !== "file:") return null;
     const encoded = new URLSearchParams(location.search).get("gp");
@@ -114,6 +126,7 @@
     try { return normalize(JSON.parse(decodeURIComponent(window.name.slice(WINDOW_PREFIX.length)))); } catch { return null; }
   }
 
+  // 更新日時だけでなくクリア地点も比較し、古い画面が新しい進行を上書きしないようにする。
   function advancement(state) {
     if (state.screen8.engineStarted) return 7;
     if (state.screen7.palmScanCompleted) return 6;
@@ -152,6 +165,7 @@
   }
   let state = resetRequested ? normalize({ resetAt: Date.now() }) : readState();
 
+  // localStorageを主保存先、window.nameを同一タブ内の予備保存先として二重化する。
   function save(nextState) {
     state = normalize(nextState);
     state.updatedAt = Date.now();
@@ -219,6 +233,7 @@
     });
   }
 
+  // 表記ゆれ（全角・空白・カタカナ）を吸収し、回答判定を入力方法に左右されにくくする。
   function normalizeRobotInput(value) {
     const normalized = String(value || "").normalize("NFKC").replace(/[\s　。、，．！？!?「」『』]/g, "");
     const hiragana = [...normalized].map(character => {
@@ -261,7 +276,7 @@
     ["ヒント", ["申し訳ありません。任務の核心についてはお答えできません。", "周囲をもう一度よく観察してみてください。", "きっと重要な情報はすでに見つけています。"]],
     ["答え", ["それを伝えてしまうと任務になりません。", "あなたなら必ず辿り着けます。", "私を信じるより、自分を信じてください。"]],
     ["分からない", ["焦る必要はありません。", "もう一度整理してみましょう。", "必要な情報はすべて揃っています。"]],
-    ["test", ["テスト入力を確認しました。", "正常に受信しました。", "通信状態は良好です。"]],
+    ["テスト", ["テスト入力を確認しました。", "正常に受信しました。", "通信状態は良好です。"]],
   ];
   const ROBOT_GENERIC_REPLIES = ["なにか御用ですか？", "なんのことでしょう？", "申し訳ありません。その内容は理解できませんでした。", "任務終了後に、その続きを聞かせてください。", "......まずは脱出に専念しましょう。"];
   const robotSmallTalkLastChoice = new Map();
@@ -279,6 +294,7 @@
     return selected.reply;
   }
 
+  // 謎の答えに該当しない入力にも反応し、会話が途切れた印象になるのを防ぐ。
   function respondToRobotSmallTalk(value, appendMessage) {
     if (typeof appendMessage !== "function") return false;
     const input = normalizeSmallTalk(value);
@@ -289,8 +305,121 @@
     return true;
   }
 
+  const POST_SCAN_RECOGNITION_WORDS = ["認証", "スキャン", "パームスキャン", "照合"];
+  const POST_SCAN_HAND_WORDS = ["手", "手形", "手のひら", "掌", "指", "4本指", "四本指"];
+  const POST_SCAN_DINOSAUR_WORDS = ["恐竜", "ディノサウロイド", "ディノ・サピエンス", "恐竜人間"];
+  const POST_SCAN_ANCESTOR_WORDS = ["祖先", "先祖", "子孫", "進化", "ルーツ"];
+  const POST_SCAN_EXTINCTION_WORDS = ["絶滅", "消える", "存在できない", "生まれない", "未来がなくなる", "タイムパラドックス"];
+  const POST_SCAN_SAVE_WORDS = ["救う", "救わ", "助ける", "助けなければ", "守る", "守ら", "隕石を回避", "衝突を回避", "地球を救う", "恐竜を救う"];
+
+  function normalizePostScanInput(value) {
+    return String(value || "").trim().normalize("NFKC").toLowerCase().replace(/[\s　。、，．！？!?「」『』・,.;:：；…]/g, "");
+  }
+
+  function containsPostScanWord(text, words) {
+    return [...words]
+      .sort((a, b) => b.length - a.length)
+      .some(word => text.includes(normalizePostScanInput(word)));
+  }
+
+  function getPostScanFlags(text) {
+    return {
+      recognition: containsPostScanWord(text, POST_SCAN_RECOGNITION_WORDS),
+      hand: containsPostScanWord(text, POST_SCAN_HAND_WORDS),
+      dinosaur: containsPostScanWord(text, POST_SCAN_DINOSAUR_WORDS),
+      ancestor: containsPostScanWord(text, POST_SCAN_ANCESTOR_WORDS),
+      extinction: containsPostScanWord(text, POST_SCAN_EXTINCTION_WORDS),
+      save: containsPostScanWord(text, POST_SCAN_SAVE_WORDS),
+    };
+  }
+
+  function incrementPostScanCount(category) {
+    const chatCounts = { ...state.screen7.chatCounts };
+    chatCounts[category] = Math.min(99, Number(chatCounts[category] || 0) + 1);
+    updateScreen7({ chatCounts });
+    return chatCounts[category];
+  }
+
+  function completePostScanDiscovery(appendMessage) {
+    appendMessage("robot", "正解です。あなた方は、恐竜から進化したディノ・サピエンスです。この時代に恐竜が絶滅すれば、あなた方が誕生する未来も失われます。");
+    withRobotTyping(() => {
+      appendMessage("robot", "このまま隕石の衝突を許すわけにはいきません。恐竜と、この地球を救う方法を考えてください。");
+      updateScreen7({ chatStage: "resolved" });
+    });
+  }
+
+  // 手形認証後の会話を段階的に進め、必要な話題が揃った時点で次の発見へ遷移させる。
+  function respondToPostScanDiscovery(value, appendMessage) {
+    if (typeof appendMessage !== "function" || !state.screen7.palmScanCompleted || state.screen7.chatStage !== "discovering") return false;
+    const text = normalizePostScanInput(value);
+    const flags = getPostScanFlags(text);
+    const questionLike = containsPostScanWord(text, ["なの", "ですか", "なのか", "何", "なぜ", "どう", "関係", "直接"]);
+    const hasWorldTarget = containsPostScanWord(text, ["地球", "隕石", "衝突", "恐竜"]);
+    const correctIdentity = flags.dinosaur && flags.ancestor && !questionLike;
+    const correctExtinction = flags.dinosaur && flags.extinction;
+    const correctRescue = flags.save && hasWorldTarget && !questionLike;
+
+    if (correctIdentity || correctExtinction || correctRescue) {
+      completePostScanDiscovery(appendMessage);
+      return true;
+    }
+    if (flags.hand && flags.dinosaur && flags.ancestor) {
+      appendMessage("robot", "その通りです。認証された4本指の手形は、あなた方が恐竜の子孫であることを示しています。");
+      return true;
+    }
+    if (flags.dinosaur && flags.ancestor) {
+      if (containsPostScanWord(text, ["直接", "目の前", "この恐竜"])) appendMessage("robot", "厳密には、目の前の個体が直接の祖先とは限りません。しかし、この時代の恐竜たちがあなた方の進化の起点です。");
+      else if (containsPostScanWord(text, ["子孫なの", "子孫ですか"])) appendMessage("robot", "はい。あなた方は、絶滅を免れた恐竜から進化した知的生命体です。");
+      else appendMessage("robot", "はい。恐竜はあなた方の祖先です。この時代の絶滅は、あなた方自身の消滅につながります。");
+      return true;
+    }
+    if (flags.hand && flags.dinosaur) {
+      appendMessage("robot", "認証されたあなたの手形と、恐竜の身体的特徴に共通点がある。その理由は、偶然ではありません。");
+      return true;
+    }
+    if (flags.hand && flags.ancestor) {
+      appendMessage("robot", "4本指の手形は、あなた方の進化の起源を示しています。自分たちの祖先が何者なのか、もう気づいているのではありませんか？");
+      return true;
+    }
+    if (flags.recognition && flags.hand) {
+      appendMessage("robot", "認証に間違いはありません。表示された4本指の手形は、認証を行ったあなた自身のものです。");
+      return true;
+    }
+    if (flags.recognition) {
+      const count = incrementPostScanCount("recognition");
+      if (count >= 3) appendMessage("robot", "認証されたのは、あなた自身の手のひらです。指の数を、もう一度よく確認してください。");
+      else if (count === 2) appendMessage("robot", "認証結果に異常はありません。ただし、あなたが想定している“人間の手”とは、少し形が異なるようですね。");
+      else appendMessage("robot", "認証は正常に完了しています。登録されているあなたの身体的特徴と、読み取った手のひらの形状が一致しました。");
+      return true;
+    }
+    if (flags.hand) {
+      const count = incrementPostScanCount("hand");
+      if (count >= 2) appendMessage("robot", "あなた自身の手が4本指だとすれば、あなたは自分をどのような生物だと考えますか？");
+      else if (containsPostScanWord(text, ["4本", "四本", "指が少ない", "指の数が少ない"])) appendMessage("robot", "はい。読み取られた手には、指が4本あります。認証エラーではありません。");
+      else if (containsPostScanWord(text, ["誰の手", "だれの手", "自分の手なの", "自分の手ですか"])) appendMessage("robot", "他人の手ではありません。認証を行った、あなた自身の手です。");
+      else if (containsPostScanWord(text, ["自分の手と違う", "自分の手ではない", "人間の手ではない", "人間の手じゃない"])) appendMessage("robot", "あなたの記憶している姿と、認証結果に食い違いがあるようですね。ですが、システム上の照合結果は一致しています。");
+      else appendMessage("robot", "表示されているのは、認証時に読み取られたあなた自身の手のひらです。");
+      return true;
+    }
+    if (flags.dinosaur) {
+      const count = incrementPostScanCount("dinosaur");
+      if (containsPostScanWord(text, ["ディノサウロイド", "ディノサピエンス", "恐竜人間"])) appendMessage("robot", "はい。あなた方は、恐竜から進化した知的生命体、ディノ・サピエンスです。");
+      else if (count >= 2) appendMessage("robot", "あなたの身体的特徴と、この時代に生息する恐竜。両者に共通点がある理由を考えてみてください。");
+      else if (containsPostScanWord(text, ["自分は恐竜", "俺たちは恐竜", "私たちは恐竜", "僕たちは恐竜"])) appendMessage("robot", "正確には、あなた自身がこの時代の恐竜というわけではありません。ですが、無関係でもありません。");
+      else appendMessage("robot", "恐竜との類似性に気づいたのですね。その可能性は、これまでに得た情報と矛盾しません。");
+      return true;
+    }
+    if (flags.ancestor) {
+      incrementPostScanCount("ancestor");
+      appendMessage("robot", "その推測は正しいです。あなた方の祖先は、この時代に生息している恐竜です。");
+      return true;
+    }
+    return false;
+  }
+
   let robotTypingCount = 0;
 
+  // ロボットの返答前に短い入力中表示を挟み、連続表示を自然な会話に見せる。
   function withRobotTyping(callback) {
     const container = document.querySelector("#chat-history");
     if (!container || typeof callback !== "function") return window.setTimeout(callback, 800);
@@ -388,28 +517,6 @@
     location.replace(prologue.href);
   }
 
-  function resetFromScreen(screenId) {
-    const target = Math.max(1, Math.min(screens.length, Number(screenId) || 1));
-    const resetAt = Date.now();
-    const baseline = normalize();
-    try { localStorage.removeItem("extinctionEscape.annotations.v1"); } catch { /* storage can be unavailable */ }
-    const nextState = {
-      ...state,
-      resetAt,
-      maxScreen: target,
-      lastScreen: 1,
-      chatHistory: state.chatHistory.filter(message => message.screen < target),
-    };
-    if (target <= 3) nextState.screen3 = baseline.screen3;
-    if (target <= 4) nextState.screen4 = baseline.screen4;
-    if (target <= 5) nextState.screen5 = baseline.screen5;
-    if (target <= 6) nextState.screen6 = baseline.screen6;
-    if (target <= 7) nextState.screen7 = baseline.screen7;
-    if (target <= 8) nextState.screen8 = baseline.screen8;
-    save(nextState);
-    location.replace(transferHref("index.html"));
-  }
-
   state.maxScreen = Math.max(state.maxScreen, currentScreen);
   state.lastScreen = currentScreen;
   save(state);
@@ -418,8 +525,10 @@
     try { history.replaceState(null, "", location.pathname + location.hash); } catch { /* file preview may restrict history */ }
   }
 
-  window.GameProgress = { getState, updateScreen3, updateScreen4, updateScreen5, updateScreen6, updateScreen7, updateScreen8, resetProgress, resetFromScreen, matchRobotKeyword, respondToRobotKeyword, respondToRobotSmallTalk, withRobotTyping };
+  // 各画面から使う機能だけを公開し、内部のstateを直接変更させない。
+  window.GameProgress = { getState, updateScreen3, updateScreen4, updateScreen5, updateScreen6, updateScreen7, updateScreen8, resetProgress, matchRobotKeyword, respondToRobotKeyword, respondToPostScanDiscovery, respondToRobotSmallTalk, withRobotTyping };
 
+  // 画面遷移後も保存済みの会話履歴を復元する。
   function setupPersistentRobotChat() {
     const container = document.querySelector("#chat-history");
     if (!container || currentScreen < 3) return;
@@ -478,6 +587,7 @@
     ["--mobile-keyboard-inset", "--mobile-viewport-height", "--mobile-viewport-top", "--mobile-chat-left", "--mobile-chat-width"].forEach(property => document.body.style.removeProperty(property));
   }
 
+  // モバイルのソフトウェアキーボードがチャット入力欄を隠さないよう表示領域を補正する。
   function updateMobileKeyboardLayout() {
     cancelAnimationFrame(mobileKeyboardFrame);
     mobileKeyboardFrame = requestAnimationFrame(() => {
@@ -541,6 +651,7 @@
   visualViewport?.addEventListener("scroll", updateMobileKeyboardLayout);
   window.addEventListener("resize", updateMobileKeyboardLayout);
 
+  // file://プレビュー時だけ進行データをリンクへ付与し、通常のHTTP配信ではURLを汚さない。
   function transferHref(rawHref) {
     if (location.protocol !== "file:" || !rawHref || rawHref.startsWith("#")) return rawHref;
     const url = new URL(rawHref, location.href);
@@ -576,7 +687,6 @@
           <button class="game-progress__hint" type="button" data-open-hint><span>ヒント</span><i aria-hidden="true">?</i></button>
           <a class="game-progress__tutorial" href="screen3.html?tutorial=1"><span>チュートリアル</span><i aria-hidden="true">?</i></a>
           <button type="button" data-open-reset-dialog><span>最初から遊ぶ</span><i aria-hidden="true">↺</i></button>
-          <button class="game-progress__debug-reset" type="button" data-open-step-reset><span>ステップ別リセット</span><i aria-hidden="true">⌁</i></button>
         </div>
       </div>
     </div>
@@ -584,54 +694,291 @@
   document.body.classList.add("has-game-progress");
   document.body.prepend(progress);
 
-  function createHintTrail(topic, hintCount) {
-    let next = {
-      title: "答え",
-      type: "answer",
-      content: `${topic}の答えをここに追加します。現在はダミー表示です。`,
-      children: [],
-    };
-    for (let number = hintCount; number >= 1; number -= 1) {
+  // ヒントは一度に答えを見せず、段階ボタンをたどった時だけ次の情報を開示する。
+  function createHintTrail(hints, answer) {
+    const answerData = typeof answer === "string" ? { content: answer } : answer;
+    let next = answerData ? {
+        title: "答え",
+        type: "answer",
+        ...answerData,
+        children: [],
+      } : null;
+    for (let index = hints.length - 1; index >= 0; index -= 1) {
+      const hintData = typeof hints[index] === "string" ? { content: hints[index] } : hints[index];
       next = {
-        title: `第${number}ヒント`,
+        title: `第${index + 1}ヒント`,
         type: "hint",
-        content: `${topic}の第${number}ヒントをここに追加します。現在はダミー表示です。`,
-        children: [next],
+        ...hintData,
+        children: next ? [next] : [],
       };
     }
     return [next];
   }
 
   const remainingPuzzleHintTopics = [
-    ...["A", "B", "C", "D", "E", "F", "G"].map(label => ({
-      title: `${label}の謎`,
+    {
+      title: "Aの謎",
       type: "topic",
-      content: `${label}の謎について、必要なところまで順番にヒントを確認できます。`,
-      children: createHintTrail(`${label}の謎`, 2),
-    })),
+      content: "Aの謎について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "▲には「イ」が入ります",
+        "●には「タ」が入ります",
+        "■には「キ」が入ります",
+      ], "キタイ"),
+    },
+    {
+      title: "Bの謎",
+      type: "topic",
+      content: "Bの謎について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "8つの文字のようなものがありますが、そのままでは読めないようです。",
+        "橙色と水色の点線の意味は何でしょう？",
+        "橙色の点線で山折り、水色の点線で谷折りしたらどうなるでしょう？なにか見えてくるはずです。",
+      ], "左のイラストと右のイラストを真ん中でくっつけたとき、間に現れる文字 → アンコク"),
+    },
+    {
+      title: "Cの謎",
+      type: "topic",
+      content: "Cの謎について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "「左のイラスト」に「右のイラスト」することで、4文字の言葉になるようです。",
+        "1行目の左のイラストは「タツ」右のイラストは「\"マキ\"つける」を意味しています。",
+        "右のイラストは上から「\"マキ\"つける」「\"ヤキ\"つける」「\"ヌイ\"つける」「\"ハリ\"つける」を意味します。",
+      ], "ツキアカリ"),
+    },
+    {
+      title: "Dの謎",
+      type: "topic",
+      content: "Dの謎について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "書かれている文字が何なのかを考えてみましょう。ひらがなではありません。",
+        "カタカナでもありません。",
+        "アルファベットです。",
+      ], "KOTAE HA KYUKAKU → キュウカク"),
+    },
+    {
+      title: "Eの謎",
+      type: "topic",
+      content: "Eの謎について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "ダイヤルの中に描かれているイラストとダイヤルの値が関係しているようです。",
+        "ダイヤルが1周回り切ると下のカウンタが1上がるようです。",
+        "下のダイヤルのイラストは左から「エンピツ」「ウチワ」「カブトムシ」「ヤカン」「パンケーキ」を表します。",
+      ], "ツウシンキ"),
+    },
+    {
+      title: "Fの謎",
+      type: "topic",
+      content: "Fの謎について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "備品ケースを見てみましょう。",
+        "備品ケース内の謎のブロックを図の形に展開して、表に重ねて見ましょう。",
+        "展開図中の三角の形が正しく「クロネコ」に重なるとき、下の図の位置にくる文字はなんでしょう？",
+      ], "スイソウ"),
+    },
+    {
+      title: "Gの謎",
+      type: "topic",
+      content: "Gの謎について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "リストの言葉でパズルを埋めましょう。",
+        "リストの言葉そのままではパズルに入らないようです。リストの言葉の共通点を考えてみましょう。",
+        "「シ\"ロク\"マ」や「\"イチ\"ハヤク」のように数字に変換できる文字がありそうです。",
+      ], "カイチク"),
+    },
     {
       title: "解答欄を埋めたら",
       type: "topic",
       content: "解答欄を埋めた後の手順について、ヒントを順番に確認できます。",
-      children: createHintTrail("解答欄を埋めた後", 1),
+      children: createHintTrail([
+        "解答欄の矢印に沿って現れた言葉をロボに伝えましょう。",
+      ], "キンキュウソチ"),
     },
     {
       title: "鍵のかかった封筒",
       type: "topic",
       content: "鍵のかかった封筒について、必要なところまで順番にヒントを確認できます。",
-      children: createHintTrail("鍵のかかった封筒", 3),
+      children: createHintTrail([
+        "解答欄と共通点がありそうです。数字の書かれた表は、解答欄の形と同じです。赤い矢印も解答欄に書かれています。",
+        "矢印に挟まれたイラストが何なのか考えてみましょう。",
+        "備品ケース内の壊れた3色ボールペンを背面から見てみましょう。同様の形が現れます。",
+        "イラストはレバーからレバーに矢印が伸びているように見えます。",
+        "イラストのとおりにレバーの色を追うと「赤→青→黒→赤...」となります。",
+        "イラストの指示に従って、解答欄のマスを追いその部分に書かれたものを読むと「2300×3＋89－2340＝」となります。",
+      ], "「4649」を入力しましょう。"),
+    },
+  ];
+  const powerRestorationHintTopics = [{
+    title: "ダイヤルの論理パズル",
+    type: "topic",
+    content: "ダイヤルの論理パズルについて、必要なところまで順番にヒントを確認できます。",
+    children: createHintTrail([
+      "まずは、すべての条件の基準になっているダイヤルを探しましょう。多くの条件に登場しているのは、Aのダイヤルです。Aの数字が決まれば、ほかの数字も順番に計算できます。",
+      "「DはAから1を引いた数字」です。さらに、「1は必ず使う」と書かれています。\nDを1にできるAの数字を考えてみましょう。",
+      "Dを1にするには、\n\nA − 1 ＝ 1\n\nとなればよいです。\nこの計算から、Aの数字を決められます。",
+      "Aが決まったら、次の条件を使って順番に求めましょう。\n\nCはAの2倍です\nDはAから1を引いた数字です\nBはAとDを足した数字です\nEはAの反対側の数字です\n\nダイヤルの反対側は、図の配置から 1と4、2と5、3と6 の組み合わせです。",
+      "Aを「2」とすると、\n\nC＝2×2\nD＝2−1\nB＝2＋1\nE＝2の反対側\n\nとなります。最後に、すべての数字が重複していないことを確認しましょう。ダイヤルは1～6で、同じ数字を重複させない条件になっています。",
+    ], "A＝2\nB＝3\nC＝4\nD＝1\nE＝5"),
+  }];
+  const engineStartupHintTopics = [
+    {
+      title: "迷路のパズル",
+      type: "topic",
+      content: "迷路のパズルについて、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        {
+          content: "条件に従って迷路を進めて行きましょう。",
+          image: "assets/hints/engine-maze-hint-1.png",
+          imageAlt: "迷路のスタートから序盤までの進み方を赤い線で示した図",
+        },
+        {
+          content: "途中まで進むとこうなります。",
+          image: "assets/hints/engine-maze-hint-2.png",
+          imageAlt: "迷路を途中まで進んだ経路を赤い線で示した図",
+        },
+      ], {
+        content: "ゴールまで進み曲がらずに進んだ部分を読むと「ロクトナナサガセ」となります。",
+        image: "assets/hints/engine-maze-answer.png",
+        imageAlt: "迷路の正解経路と、曲がらずに進んだ部分の文字を示した解答図",
+      }),
+    },
+    {
+      title: "迷路が解けたら",
+      type: "topic",
+      content: "迷路を解いた後の手順について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "「ロクトナナサガセ」は「6と7を探せ」と読めます。",
+        "鍵のかかった封筒を確認すると表の中にそれぞれ1つずつ「6」と「7」があることが分かります。",
+        "封筒の表は解答欄と連動したのでした。「6」と「7」の部分の解答欄の色を確認しましょう。",
+      ], "コントロールルームで「ピンク」と「黄色」のボタンを同時に押しましょう。"),
+    },
+  ];
+  const returnToFutureHintTopics = [
+    {
+      title: "何をしたらいいか分からない",
+      type: "topic",
+      content: "未来へ帰るために何をすればよいか、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "タイムマシンの起動方法を確認すると、タイムマシンの起動には①装着の対象②移動時間③操作するレバーの順番が必要なことが分かります。",
+        "タイムマシンはすでに宇宙船に装着済みです。また、移動時間はオープニングから6500万年であることが分かります。",
+        "操作するレバーの順番は汚れてしまっています。暗号表を使用して順番を解読する必要がありそうです。",
+      ], "まずは、ロボに「暗号表」と伝えてみましょう。"),
+    },
+    {
+      title: "暗号表を解読する",
+      type: "topic",
+      content: "暗号表の解読方法について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "備品ケースの暗号表を、謎のブロックと組み合わせて使用してみましょう。",
+        {
+          content: "暗号表の解読方法にしたがって「ゴゴウシステム」を解読しましょう。",
+          image: "assets/hints/future-code-arrow.png",
+          imageAlt: "暗号表でゴゴウシステムを解読するための矢印を示した図",
+        },
+      ], {
+        content: "ツキアカリミロと解読できました。",
+        image: "assets/hints/future-code-system.png",
+        imageAlt: "暗号表からツキアカリミロと読み取れる箇所を示した図",
+      }),
+    },
+    {
+      title: "暗号表を解読したら",
+      type: "topic",
+      content: "暗号表を解読した後の手順について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "「ツキアカリミロ」は「ツキアカリ見ろ」と読み取れます。",
+        "ファイルの謎で解いた問題に「ツキアカリ」が答えの問題がありました。解答欄を確認しましょう。",
+      ], "コントロールルームで「黄・黒・赤・青・ピンク」の順番でレバーを引きましょう。"),
+    },
+  ];
+  const earthEscapeHintTopics = [
+    {
+      title: "無事に故郷に帰るためには",
+      type: "topic",
+      content: "故郷へ無事に帰るための方法について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "認証の結果、あなたは「ディノ・サピエンス」だと分かりました。ディノ（DINO）は恐竜を意味します。",
+        "あなたは恐竜の遠い子孫です。このまま地球を脱出すると隕石が衝突し、恐竜は絶滅してしまいます。隕石の衝突を回避する方法を考えましょう。",
+        "タイムマシン解説書の以下の部分に注目しましょう。\n\n『タイムマシンの装着対象に、原則として制限はない』\n『時空転移が実行されると、対象は即座に消失し、転移先の時間に出現する』\n『対象が対象以外の影響により運動していた場合、時間移動直前の運動状態を維持したまま移動する』",
+        "タイムマシンで『　　』を転移させることができれば、隕石が衝突するはずだった瞬間をスキップできるかもしれません。",
+        "『地球』を転移させる必要がありそうです。具体的な方法を考えましょう。",
+        "転移にはタイムマシンが必要です。宇宙船に装着された「5号システム」以外に、タイムマシンは存在するでしょうか？",
+        "タイムマシン解説書の以下の部分に注目しましょう。\n\n『タイムマシンは現在までに5機開発されており、最新型は「5号システム」と命名された』\n『タイムマシンは最新型に更新されるたびにレバーの数が増えて移動可能時間が飛躍的に増加した。特に3号から4号での進歩はめざましかった』",
+        "更新前のタイムマシンが船内に残っていないでしょうか？",
+        "備品ケース内の「壊れた3色ボールペン」は「3号システム」かもしれません。もしそうなら、その起動方法を探りましょう。",
+        {
+          content: "「3号システム」にも暗号表が使えそうです。暗号表の解読方法にしたがって「サンゴウシステム」を解読しましょう。",
+          image: "assets/hints/future-system-3.png",
+          imageAlt: "暗号表でサンゴウシステムを解読する経路を示した図",
+        },
+        {
+          content: "「スベテヲフタツニ」と解読できました。",
+          image: "assets/hints/future-double-all.png",
+          imageAlt: "暗号表からスベテヲフタツニと読み取れる箇所を示した図",
+        },
+        "「スベテヲフタツニ」は「全てを2つに」と読めます。「全て」という言葉は、エンジン起動手順の迷路にある指示に使われていました。その指示を読み替えて、迷路を解き直しましょう。",
+        {
+          content: "指示どおりに迷路を解き直すと、「カガミミロ」という文章が現れます。",
+          image: "assets/hints/future-mirror-maze.png",
+          imageAlt: "迷路を解き直してカガミミロの文字を示した図",
+        },
+        "「カガミミロ」は「鏡見ろ」と読めます。つまり、自分の姿を確認しろという指示です。自分の姿を確認する方法はあったでしょうか？",
+        {
+          content: "「あなた」の姿はプロローグ画面で確認できます。",
+          image: "assets/hints/future-you.png",
+          imageAlt: "胸にワッペンと5色の装飾がある宇宙服姿のあなた",
+        },
+        "「あなた」の胸には矢印のついたワッペンと、「赤・黒・青・黒・赤」の順で並んだ装飾があります。これがレバーを操作する順番になりそうです。",
+      ]),
+    },
+    {
+      title: "行動実行",
+      type: "topic",
+      content: "考えた作戦を実行する手順について、必要なところまで順番にヒントを確認できます。",
+      children: createHintTrail([
+        "ロボに話しかけてみましょう。",
+        "指示内容が分からない場合は、ヒント項目「無事に故郷に帰るためには」を確認してください。",
+        "ロボに、「地球」に「壊れた3色ボールペン」または「3号システム」を「設置」または「装着」するよう依頼しましょう。",
+        "作業内容をフォームに入力しましょう。移動時間は、起動予測とタイムマシン解説書にある最大移動時間を確認してください。",
+      ], "使用するアイテム：壊れた3色ボールペン\n正式名称：3号システム\n設置場所：地球\n移動時間：20分\n起動操作：赤・黒・青・黒・赤\n\n上記の内容をフォームに入力して作業内容を確認してください。\nその後、「エンジン始動」ボタンを押すとエンディングです。"),
     },
   ];
   const hintTree = {
     title: "ヒント一覧",
     type: "root",
     content: "確認したいカテゴリーを選択してください。ヒントと答えは段階的に表示されます。",
-    children: [{
-      title: "残された7つの謎",
-      type: "category",
-      content: "A〜Gの謎、解答欄、鍵のかかった封筒のヒントを確認できます。",
-      children: remainingPuzzleHintTopics,
-    }],
+    children: [
+      {
+        title: "残された7つの謎",
+        type: "category",
+        content: "A〜Gの謎、解答欄、鍵のかかった封筒のヒントを確認できます。",
+        children: remainingPuzzleHintTopics,
+      },
+      {
+        title: "電源復旧手順を解読せよ",
+        type: "category",
+        content: "電源復旧に必要なダイヤルの論理パズルのヒントを確認できます。",
+        children: powerRestorationHintTopics,
+      },
+      {
+        title: "エンジン起動手順",
+        type: "category",
+        content: "迷路のパズルと、迷路を解いた後の手順についてヒントを確認できます。",
+        children: engineStartupHintTopics,
+      },
+      {
+        title: "未来へ帰る方法を探せ",
+        type: "category",
+        content: "タイムマシンを使って未来へ帰るための手順についてヒントを確認できます。",
+        children: returnToFutureHintTopics,
+      },
+      {
+        title: "地球脱出",
+        type: "category",
+        content: "地球と恐竜を救い、無事に脱出するための作戦についてヒントを確認できます。",
+        children: earthEscapeHintTopics,
+      },
+    ],
   };
   const hintDialog = document.createElement("section");
   hintDialog.className = "game-hint-dialog";
@@ -667,26 +1014,6 @@
     </div>
   `;
   document.body.append(resetDialog);
-
-  const stepResetDialog = document.createElement("section");
-  stepResetDialog.className = "game-reset-dialog game-step-reset-dialog";
-  stepResetDialog.hidden = true;
-  const stepResetButtons = screens.filter(screen => screen.id <= state.maxScreen).map(screen => `
-    <button type="button" data-reset-to-screen="${screen.id}">
-      <b>${screen.id}</b><span>${screen.label}</span>${screen.id === 1 ? "<small>全消去</small>" : ""}
-    </button>
-  `).join("");
-  stepResetDialog.innerHTML = `
-    <button class="game-reset-dialog__backdrop" type="button" data-cancel-step-reset aria-label="ステップ別リセットをキャンセル"></button>
-    <div class="game-reset-dialog__window game-step-reset-dialog__window" role="dialog" aria-modal="true" aria-labelledby="game-step-reset-title" aria-describedby="game-step-reset-description">
-      <small>DEBUG RESET</small>
-      <h2 id="game-step-reset-title">どのステップから<br>やり直しますか？</h2>
-      <p id="game-step-reset-description">選択したステップと、それ以降の操作状態を削除します。それ以前のクリア状態は残り、リセット後はプロローグへ移動します。</p>
-      <div class="game-step-reset-dialog__steps">${stepResetButtons}</div>
-      <button class="game-step-reset-dialog__cancel" type="button" data-cancel-step-reset>キャンセル</button>
-    </div>
-  `;
-  document.body.append(stepResetDialog);
 
   const initialCollisionMinutes = collisionMinutesByProgress[state.maxScreen];
   let trajectorySimulator = null;
@@ -758,7 +1085,6 @@
   const hintContent = hintDialog.querySelector(".game-hint-dialog__content");
   const hintPath = [hintTree];
   const cancelResetButton = resetDialog.querySelector(".game-reset-dialog__window [data-cancel-reset]");
-  const cancelStepResetButton = stepResetDialog.querySelector(".game-step-reset-dialog__window [data-cancel-step-reset]");
 
   if (trajectorySimulator) {
     const simulatorButton = trajectoryLaunchButton;
@@ -910,14 +1236,20 @@
         <span>${node.type === "answer" ? "ANSWER DATA" : "SUPPORT DATA"}</span>
         <h3>${node.title}</h3>
         <p>${node.content}</p>
-        ${node.type === "answer" ? '<small>答えの内容は現在ダミーです。</small>' : ""}
+        ${node.image ? `<img class="game-hint-dialog__media" src="${node.image}" alt="${node.imageAlt || ""}" loading="lazy">` : ""}
       </section>
       ${node.children.length ? `<div class="game-hint-dialog__items">${node.children.map((child, index) => `
         <button type="button" data-hint-child="${index}">
           <span><small>${child.type === "answer" ? "ANSWER" : child.type === "hint" ? "HINT" : "CATEGORY"}</small><b>${child.title}</b></span>
           <i aria-hidden="true">→</i>
         </button>`).join("")}</div>` : ""}
-      ${hintPath.length > 1 ? '<button class="game-hint-dialog__back" type="button" data-hint-back><i aria-hidden="true">←</i><span>ひとつ前に戻る</span></button>' : ""}
+      ${hintPath.length > 1 ? `<div class="game-hint-dialog__nav-actions">
+        <button class="game-hint-dialog__back" type="button" data-hint-back><i aria-hidden="true">←</i><span>ひとつ前に戻る</span></button>
+        ${node.type === "hint" || node.type === "answer" ? `
+          <button class="game-hint-dialog__back" type="button" data-hint-category><i aria-hidden="true">↖</i><span>カテゴリ選択に戻る</span></button>
+          <button class="game-hint-dialog__back" type="button" data-hint-topic><i aria-hidden="true">↰</i><span>項目選択に戻る</span></button>
+        ` : ""}
+      </div>` : ""}
     `;
     hintContent.scrollTop = 0;
   }
@@ -943,11 +1275,6 @@
     menuButton.focus();
   }
 
-  function closeStepResetDialog() {
-    stepResetDialog.hidden = true;
-    menuButton.focus();
-  }
-
   menuButton.addEventListener("click", () => {
     const willOpen = menuPanel.hidden;
     menuPanel.hidden = !willOpen;
@@ -963,6 +1290,18 @@
       const child = node.children[Number(childButton.dataset.hintChild)];
       if (!child) return;
       hintPath.push(child);
+      renderHintNode();
+      hintContent.focus({ preventScroll: true });
+      return;
+    }
+    if (event.target.closest("[data-hint-category]") && hintPath.length > 1) {
+      hintPath.splice(1);
+      renderHintNode();
+      hintContent.focus({ preventScroll: true });
+      return;
+    }
+    if (event.target.closest("[data-hint-topic]") && hintPath.length > 2) {
+      hintPath.splice(2);
       renderHintNode();
       hintContent.focus({ preventScroll: true });
       return;
@@ -991,21 +1330,12 @@
   });
   resetDialog.querySelectorAll("[data-cancel-reset]").forEach(button => button.addEventListener("click", closeResetDialog));
   resetDialog.querySelector("[data-confirm-reset]").addEventListener("click", resetProgress);
-  progress.querySelector("[data-open-step-reset]").addEventListener("click", () => {
-    closeMenu();
-    stepResetDialog.hidden = false;
-    cancelStepResetButton.focus();
-  });
-  stepResetDialog.querySelectorAll("[data-cancel-step-reset]").forEach(button => button.addEventListener("click", closeStepResetDialog));
-  stepResetDialog.querySelectorAll("[data-reset-to-screen]").forEach(button => button.addEventListener("click", () => resetFromScreen(button.dataset.resetToScreen)));
-
   document.addEventListener("click", event => {
     if (!progress.querySelector(".game-progress__menu").contains(event.target)) closeMenu();
   });
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
     if (!hintDialog.hidden) closeHintDialog();
-    else if (!stepResetDialog.hidden) closeStepResetDialog();
     else if (!resetDialog.hidden) closeResetDialog();
     else closeMenu();
   });

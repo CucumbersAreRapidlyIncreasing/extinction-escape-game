@@ -1,5 +1,6 @@
 (() => {
   "use strict";
+  // 真エンドの二段階構成（離陸記録→物語→エンディング動画→結果表示）を順番に解放する。
   const launchVideo=document.querySelector("#true-launch-video"),launchTerminal=document.querySelector("#launch-terminal"),launchStatus=document.querySelector("#launch-status"),launchMessage=document.querySelector("#launch-message"),story=document.querySelector("#true-story"),endingVideo=document.querySelector("#ending-video"),endingTerminal=document.querySelector("#ending-terminal"),endingStatus=document.querySelector("#ending-status"),endingMessage=document.querySelector("#ending-message"),result=document.querySelector("#true-result");
   let storyRevealed=false,resultRevealed=false;
   function revealStory(){if(storyRevealed)return;storyRevealed=true;launchTerminal.classList.remove("is-playing");launchTerminal.classList.add("is-complete");launchStatus.textContent="PLAYBACK COMPLETE";launchMessage.textContent="離陸記録の再生が完了しました。";story.hidden=false;requestAnimationFrame(()=>{story.classList.add("is-revealed");story.scrollIntoView({behavior:"smooth",block:"start"})})}

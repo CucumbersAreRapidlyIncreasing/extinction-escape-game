@@ -1,6 +1,7 @@
 (() => {
   "use strict";
 
+  // 謎A〜G、解答用紙、4桁ダイヤル錠、備品ケースとロボット会話をまとめて制御する。
   const body = document.body;
   const context = body.dataset.screenContext || "unknown";
   const inventoryLayer = document.querySelector("#inventory-layer");
@@ -45,6 +46,7 @@
   const dialValues = [1, 1, 1, 1];
   let lastFocus = null;
 
+  // 入力途中のダイヤル値も保存し、ページを閉じても同じ位置から再開できるようにする。
   function saveStepProgress(patch) {
     window.GameProgress?.updateScreen3({ ...patch, dials: [...dialValues] });
   }
@@ -95,6 +97,7 @@
     return value.normalize("NFKC").replace(/[\s　。、，．！？!?]/g, "").toLowerCase();
   }
 
+  // 回答判定では装飾的な空白や全角半角の違いを無視する。
   function normalizePuzzleAnswer(value) {
     return value
       .normalize("NFKC")
@@ -102,6 +105,7 @@
       .replace(/[ぁ-ゖ]/g, character => String.fromCharCode(character.charCodeAt(0) + 0x60));
   }
 
+  // 個別の謎を解いた結果を、中央の解答用紙の対応マスへ同期する。
   function fillAnswerSheet(id, answer, animate = false) {
     const start = ANSWER_SHEET_POSITIONS[id];
     if (!start) return;
@@ -157,6 +161,7 @@
     });
   });
 
+  // モーダル表示中の背面スクロールをまとめて切り替える。
   function setPageLocked(locked) {
     body.classList.toggle("modal-open", locked);
   }

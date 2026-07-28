@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  // 三色ボールペンのGLBモデルをWebGLで表示する軽量ビューアー。
+  // 外部3Dライブラリを使わず、モデル読込・行列計算・ドラッグ回転・ズームをここで処理する。
   const canvas = document.querySelector("#pen-canvas");
   const loading = document.querySelector("#loading");
   const viewLabel = document.querySelector("#view-label");
@@ -55,6 +57,7 @@
   const typeSize={SCALAR:1,VEC2:2,VEC3:3,VEC4:4};
   let shapes=[];
 
+  // GLBのJSONチャンクとバイナリチャンクを分離し、描画に必要な頂点と材質を取り出す。
   async function loadGlb(url) {
     const response=await fetch(url);
     if(!response.ok) throw new Error(`GLB ${response.status}`);
@@ -100,6 +103,7 @@
     gl.bindBuffer(gl.ARRAY_BUFFER,shape.normalBuffer);gl.enableVertexAttribArray(normalLoc);gl.vertexAttribPointer(normalLoc,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,shape.indexBuffer);gl.uniform4fv(colorLoc,shape.material.color);gl.uniform1f(metalLoc,shape.material.metallic);gl.drawElements(gl.TRIANGLES,shape.count,shape.indexType,0);
   }
+  // 毎フレーム、現在の回転角・距離からビュー行列を作り直して全メッシュを描画する。
   function render(){
     resize();const sceneRotation=multiply(rotY(yaw),rotX(pitch)),view=translate(0,0,-distance),projection=perspective(Math.PI/4,canvas.width/canvas.height,.01,2),pv=multiply(projection,view);
     gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);

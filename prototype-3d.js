@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  // 謎ブロックの3D操作プロトタイプ。
+  // WebGLで立方体を描き、ドラッグ回転・ピンチ／ホイールズーム・上面判定を確認できる。
   const canvas = document.querySelector("#cube-viewer");
   const status = document.querySelector("#status");
   const faceLabel = document.querySelector("#face-label");
@@ -142,6 +144,7 @@
     requestAnimationFrame(render);
   }
 
+  // 現在もっとも手前を向いている面を内積で求め、確認用ラベルへ表示する。
   function updateFaceLabel() {
     const normals = [
       ["黄色の面",0,0,1],["右面",1,0,0],["奥面",0,0,-1],

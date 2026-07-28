@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  // トップページの要素を、スクロールで表示領域へ入った順にフェード表示する。
+  // 動きを減らす端末設定ではアニメーションせず、最初からすべて表示する。
   const items = document.querySelectorAll(".reveal");
   if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     items.forEach(item => item.classList.add("is-visible"));

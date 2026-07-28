@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  // 画面4の備品ケース、ロボット会話、資料拡大表示を制御する。
+  // 電源ダイヤル本体の判定はcontrol-room.jsが担当する。
   const body = document.body;
   const inventoryLayer = document.querySelector("#inventory-layer");
   const inventoryList = document.querySelector("#inventory-list");
@@ -15,6 +17,7 @@
   let defaultReplyIndex = 0;
   const replies = ["なんのことでしょう？", "私にはわかりません。", "電源復旧資料を確認してみてください。"]; 
 
+  // オーバーレイ表示中は背面ページのスクロールを止める。
   function setPageLocked(locked) { body.classList.toggle("modal-open", locked); }
 
   function openInventory() {

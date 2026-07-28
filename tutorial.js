@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  // 画面3を初めて訪れた時だけ表示する操作チュートリアル。
+  // 対象要素をスポットライトで示し、画面端を避けて説明カードを配置する。
   if (document.body.dataset.gameScreen !== "3") return;
 
   const STORAGE_KEY = "extinctionEscape.screen3Tutorial.v1";
@@ -117,6 +119,7 @@
     return distances.sort((a, b) => a.distance - b.distance)[0];
   }
 
+  // 対象の位置と画面サイズから、カード・矢印・スポットライトを再配置する。
   function positionTutorial() {
     const step = steps[currentIndex];
     const target = step.selector ? document.querySelector(step.selector) : null;
@@ -209,6 +212,7 @@
     requestAnimationFrame(positionTutorial);
   }
 
+  // 完了状態を保存し、次回以降はチュートリアルを自動表示しない。
   function finishTutorial() {
     try { localStorage.setItem(STORAGE_KEY, "complete"); } catch (_) {}
     document.body.classList.remove("screen-tutorial-open");

@@ -1,5 +1,7 @@
 (() => {
   "use strict";
+  // 画面5の備品ケース、ロボット会話、資料拡大表示を制御する。
+  // 色ボタンによるエンジン起動判定はengine-control-room.jsが担当する。
   const body = document.body;
   const inventoryLayer = document.querySelector("#inventory-layer");
   const inventoryList = document.querySelector("#inventory-list");

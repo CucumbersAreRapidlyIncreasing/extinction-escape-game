@@ -1,5 +1,6 @@
 (() => {
   "use strict";
+  // バッドエンド動画の再生状態を端末表示へ反映し、再生終了後に物語本文を開示する。
   const video=document.querySelector("#bad-ending-video"),terminal=document.querySelector("#bad-video-terminal"),status=document.querySelector("#bad-video-status"),message=document.querySelector("#bad-video-message"),story=document.querySelector("#bad-story");
   let revealed=false;
   function revealStory(){if(revealed)return;revealed=true;terminal.classList.remove("is-playing");terminal.classList.add("is-complete");status.textContent="PLAYBACK COMPLETE";message.textContent="離陸記録の再生が完了しました。";story.hidden=false;requestAnimationFrame(()=>{story.classList.add("is-revealed");story.scrollIntoView({behavior:"smooth",block:"start"})})}

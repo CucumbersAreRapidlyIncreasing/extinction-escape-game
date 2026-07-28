@@ -1,6 +1,8 @@
 (()=>{
   "use strict";
 
+  // YouTube IFrame APIを必要になった時だけ読み込み、各動画ページへ共通の再生イベントを提供する。
+  // API読込はPromiseを使い回し、複数動画があってもscriptタグを重複追加しない。
   let apiPromise;
 
   function loadApi(){
@@ -32,6 +34,7 @@
     return apiPromise;
   }
 
+  // 呼び出し側はonPlay/onPause/onEnded/onErrorだけ渡せば、API固有の処理を意識せずに済む。
   async function create(element,handlers={}){
     const YT=await loadApi();
     return new Promise(resolve=>{

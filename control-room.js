@@ -1,6 +1,7 @@
 (() => {
   "use strict";
 
+  // 電源制御室の5つのダイヤルを描画・判定し、正解時の復旧状態を保存する。
   const correctValues = [2, 3, 4, 1, 5];
   const saved = window.GameProgress?.getState().screen4;
   const values = saved?.dials ? [...saved.dials] : [1, 1, 1, 1, 1];
@@ -27,6 +28,7 @@
 
   dialBank.innerHTML = values.map((_, index) => dialMarkup(index)).join("");
 
+  // 正解前のダイヤル位置も保存し、再読み込みで操作が巻き戻らないようにする。
   function persist() {
     window.GameProgress?.updateScreen4({
       dials: [...values],
@@ -34,6 +36,7 @@
     });
   }
 
+  // 復旧演出と進行保存を集約し、初回正解と状態復元で表示を揃える。
   function showSuccess() {
     restored = true;
     document.body.classList.add("power-is-restored");
