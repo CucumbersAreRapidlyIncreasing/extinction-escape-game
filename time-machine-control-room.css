@@ -5,7 +5,7 @@
 .transfer-settings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:clamp(25px,4vw,42px)}
 .transfer-setting{display:grid;grid-template-columns:minmax(90px,.45fr) 1fr;align-items:center;min-height:64px;border:1px solid #315758;background:#020708}
 .transfer-setting>span{padding:0 18px;color:#6f9997;font:800 9px/1 ui-monospace,monospace;letter-spacing:.12em}
-.transfer-setting strong,.transfer-setting input{min-width:0;height:100%;padding:0 18px;border:0;border-left:1px solid #315758;color:#e2eeec;background:#0b1718;font:900 clamp(15px,2vw,21px)/1 sans-serif}
+.transfer-setting strong,.transfer-setting input{min-width:0;height:100%;padding:0 18px;border:0;border-left:1px solid #315758;color:#e2eeec;background:#0b1718;font:900 clamp(16px,2vw,21px)/1 sans-serif}
 .transfer-setting strong{display:flex;align-items:center}
 .transfer-setting strong small{margin-left:8px;color:#77918f;font-size:10px}
 .transfer-setting input:focus{outline:2px solid #45bfb5;outline-offset:-2px}
