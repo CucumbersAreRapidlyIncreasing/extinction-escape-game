@@ -232,7 +232,15 @@
       stage.classList.add("annotation-stage", "annotation-stage--lightbox");
     }
     const toolbar = createToolbar("拡大画像", true);
-    stage.parentNode.insertBefore(toolbar, stage);
+    const scroll = stage.closest(".lightbox-scroll");
+    const lightboxWindow = scroll?.closest(".lightbox-window");
+    if (scroll && lightboxWindow) {
+      // ツールバーを画像のスクロール領域から分離し、初回表示時も確実に描画する。
+      lightboxWindow.classList.add("has-annotation-toolbar");
+      lightboxWindow.insertBefore(toolbar, scroll);
+    } else {
+      stage.parentNode.insertBefore(toolbar, stage);
+    }
     const surface = new AnnotationSurface(image, stage, toolbar, image.getAttribute("src"));
     const syncSource = () => surface.setSource(image.getAttribute("src") || "");
     new MutationObserver(syncSource).observe(image, { attributes: true, attributeFilter: ["src"] });

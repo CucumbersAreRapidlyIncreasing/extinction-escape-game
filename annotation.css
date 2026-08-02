@@ -31,7 +31,8 @@
 .annotation-toolbar .annotation-clear { margin-left:auto; border-color:#743034; color:#f3b6b8; background:#291416; }
 .annotation-toolbar .annotation-clear i { color:#f06065; }
 .annotation-toolbar .annotation-finish[hidden] { display:none; }
-.annotation-toolbar--lightbox { position:sticky; z-index:8; top:0; width:min(920px,100%); margin:0 auto 10px; border:1px solid #3a444c; box-shadow:0 8px 28px rgba(0,0,0,.42); }
+.lightbox-window.has-annotation-toolbar { grid-template-rows:auto auto minmax(0,1fr); }
+.annotation-toolbar--lightbox { position:relative; z-index:8; top:auto; flex:none; width:100%; margin:0; border:0; border-bottom:1px solid #3a444c; box-shadow:0 8px 28px rgba(0,0,0,.42); }
 .annotation-stage--lightbox { display:inline-block; min-width:min(900px,100%); width:100%; vertical-align:top; }
 @media(max-width:620px){
   .annotation-toolbar { gap:5px; padding:6px; }
