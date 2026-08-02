@@ -680,12 +680,14 @@
     lightboxImage.alt = button.dataset.lightboxLabel;
     lightboxTitle.textContent = button.dataset.lightboxLabel;
     lightbox.hidden = false;
+    window.LightboxZoom?.setActive(true);
     body.classList.add("modal-open");
     lightbox.querySelector("[data-close-lightbox]").focus();
   }
   function closeLightbox() {
     lightbox.hidden = true;
     lightboxImage.src = "";
+    window.LightboxZoom?.setActive(false);
     body.classList.remove("modal-open");
     lastFocus?.focus();
   }

@@ -52,8 +52,8 @@
     window.GameProgress.withRobotTyping(() => { if (window.GameProgress?.respondToRobotKeyword(value, appendMessage)) return; window.GameProgress?.respondToRobotSmallTalk(value, appendMessage); });
   });
 
-  function openLightbox(button) { lastFocus = button; lightboxImage.src = button.dataset.lightboxSrc; lightboxImage.alt = button.dataset.lightboxLabel; lightboxTitle.textContent = button.dataset.lightboxLabel; lightbox.hidden = false; lockPage(true); lightbox.querySelector("[data-close-lightbox]").focus(); }
-  function closeLightbox() { lightbox.hidden = true; lightboxImage.src = ""; lockPage(false); lastFocus?.focus(); }
+  function openLightbox(button) { lastFocus = button; lightboxImage.src = button.dataset.lightboxSrc; lightboxImage.alt = button.dataset.lightboxLabel; lightboxTitle.textContent = button.dataset.lightboxLabel; lightbox.hidden = false; window.LightboxZoom?.setActive(true); lockPage(true); lightbox.querySelector("[data-close-lightbox]").focus(); }
+  function closeLightbox() { lightbox.hidden = true; lightboxImage.src = ""; window.LightboxZoom?.setActive(false); lockPage(false); lastFocus?.focus(); }
   document.querySelectorAll("[data-lightbox-src]").forEach(button => button.addEventListener("click", () => openLightbox(button)));
   document.querySelectorAll("[data-close-lightbox]").forEach(button => button.addEventListener("click", closeLightbox));
   document.addEventListener("keydown", event => {

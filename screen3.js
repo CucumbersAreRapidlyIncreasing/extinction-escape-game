@@ -303,6 +303,7 @@
     lightboxTitle.textContent = label;
     lightboxAnswerOverlay.hidden = !button.classList.contains("answer-image");
     lightbox.hidden = false;
+    window.LightboxZoom?.setActive(true);
     setPageLocked(true);
     lightbox.querySelector("[data-close-lightbox]").focus();
   }
@@ -311,6 +312,7 @@
     lightbox.hidden = true;
     lightboxImage.src = "";
     lightboxAnswerOverlay.hidden = true;
+    window.LightboxZoom?.setActive(false);
     setPageLocked(false);
     lastFocus?.focus();
   }

@@ -97,6 +97,7 @@
     lightboxImage.alt = button.dataset.lightboxLabel;
     lightboxTitle.textContent = button.dataset.lightboxLabel;
     lightbox.hidden = false;
+    window.LightboxZoom?.setActive(true);
     setPageLocked(true);
     lightbox.querySelector("[data-close-lightbox]").focus();
   }
@@ -104,6 +105,7 @@
   function closeLightbox() {
     lightbox.hidden = true;
     lightboxImage.src = "";
+    window.LightboxZoom?.setActive(false);
     setPageLocked(false);
     lastFocus?.focus();
   }

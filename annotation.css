@@ -38,4 +38,8 @@
   .annotation-toolbar button { flex:1 1 0; min-width:54px; padding:0 6px; }
   .annotation-toolbar button span { display:none; }
   .annotation-toolbar .annotation-clear { margin-left:0; }
+
+  /* 拡大表示中は、資料への書き込み操作をアイコンだけにせず表示する。 */
+  .annotation-toolbar--lightbox button { gap:4px; min-width:0; padding:0 5px; font-size:9px; }
+  .annotation-toolbar--lightbox button span { display:inline; }
 }
