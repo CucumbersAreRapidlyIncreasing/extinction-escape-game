@@ -105,9 +105,7 @@ body.has-mobile-keyboard-chat .robot-chat,
 body.has-mobile-keyboard-chat .chat-form { transition:none !important; }
 body.mobile-keyboard-move-chat .robot-chat { top:var(--mobile-viewport-top); right:6px; bottom:auto; width:calc(100% - 12px); height:var(--mobile-viewport-height); max-height:var(--mobile-viewport-height); }
 body.mobile-keyboard-float-input .chat-form { position:fixed; z-index:76; left:var(--mobile-chat-left); bottom:var(--mobile-keyboard-inset); width:var(--mobile-chat-width); box-shadow:0 -10px 28px rgba(0,0,0,.48); }
-@media (hover:none), (pointer:coarse) {
-  html,body { touch-action:manipulation; }
-}
+html,body { touch-action:pan-x pan-y; }
 
 .trajectory-simulator[hidden],.trajectory-simulator [hidden] { display:none !important; }
 .trajectory-simulator { position:fixed; z-index:130; inset:0; display:grid; place-items:center; padding:18px; color:#f4f8f8; }
