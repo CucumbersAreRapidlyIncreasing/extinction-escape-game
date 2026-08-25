@@ -1339,4 +1339,25 @@
     else if (!resetDialog.hidden) closeResetDialog();
     else closeMenu();
   });
+
+  // 暗号表の取得後は、過去画面や各コントロールルームへ戻っても組み合わせ機能を使えるようにする。
+  function ensureCipherCombinationTools(progressState = state) {
+    if (!progressState.screen6?.cipherTableReceived) return;
+    if (!document.querySelector("#inventory-layer")) return;
+    if (!document.querySelector('link[data-cipher-combination-style]')) {
+      const style = document.createElement("link");
+      style.rel = "stylesheet";
+      style.href = "cipher-combination.css?v=20260825-3";
+      style.dataset.cipherCombinationStyle = "";
+      document.head.append(style);
+    }
+    if (!document.querySelector('script[data-cipher-combination-script]')) {
+      const script = document.createElement("script");
+      script.src = "cipher-combination.js?v=20260825-3";
+      script.dataset.cipherCombinationScript = "";
+      document.body.append(script);
+    }
+  }
+  window.addEventListener("gameprogresschange", event => ensureCipherCombinationTools(event.detail));
+  ensureCipherCombinationTools();
 })();

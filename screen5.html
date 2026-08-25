@@ -77,15 +77,17 @@
     <div class="inventory-window" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
       <header class="window-header"><div><span>EQUIPMENT STORAGE</span><h2 id="inventory-title">備品ケース</h2></div><button type="button" class="window-close" data-close-inventory aria-label="閉じる">×</button></header>
       <div class="inventory-list" id="inventory-list">
-        <p class="inventory-count">保管中の備品 <strong>2</strong></p>
+        <p class="inventory-count">保管中の備品 <strong id="inventory-count">2</strong></p>
         <div class="inventory-grid">
           <button class="inventory-item" type="button" data-open-detail="inventory-detail"><span class="item-preview" aria-hidden="true"></span><span class="item-copy"><small>ITEM 01</small><strong>謎の<br>ブロック</strong><i>詳しく見る →</i></span></button>
           <button class="inventory-item" type="button" data-open-detail="pen-detail"><span class="item-preview item-preview-pen" aria-hidden="true"></span><span class="item-copy"><small>ITEM 02</small><strong>壊れた3色<br>ボールペン</strong><i>詳しく見る →</i></span></button>
-          <div class="inventory-slot" aria-hidden="true"><span>EMPTY</span></div>
+          <button class="inventory-item" id="cipher-item" type="button" data-open-detail="cipher-detail" hidden><span class="item-preview item-preview-cipher" aria-hidden="true">暗号表</span><span class="item-copy"><small>ITEM 03</small><strong>暗号表</strong><i>詳しく見る →</i></span></button>
+          <div class="inventory-slot" id="inventory-empty-slot" aria-hidden="true"><span>EMPTY</span></div>
         </div>
       </div>
       <div class="inventory-detail" id="inventory-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 01</span><h3>謎のブロック</h3><p>ドラッグまたはスワイプして、各面を確認できます。</p></div><iframe src="prototype-3d.html" title="謎のブロックの3D表示" loading="lazy"></iframe></div>
       <div class="inventory-detail" id="pen-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 02</span><h3>壊れた3色ボールペン</h3><p>なぜか芯が出てこない、筆記具としての機能は失われているようだ</p></div><iframe src="pen-viewer.html" title="壊れた3色ボールペンの3D表示" loading="lazy"></iframe></div>
+      <div class="inventory-detail cipher-detail" id="cipher-detail" hidden><button type="button" class="detail-back" data-detail-back>← 備品一覧へ</button><div class="detail-title"><span>ITEM 03</span><h3>暗号表</h3><p>7×7のマスを使って、機器名やシステム名を解読します。</p></div><div class="cipher-overview"><button type="button" data-lightbox-src="assets/screen6/images/cipher-table.png" data-lightbox-label="暗号表"><img src="assets/screen6/images/cipher-table.png" alt="カタカナが7行7列に並んだ暗号表"><span>拡大表示</span></button></div></div>
     </div>
   </section>
 
@@ -98,7 +100,7 @@
   <section class="image-lightbox" id="image-lightbox" hidden><button class="lightbox-backdrop" type="button" data-close-lightbox aria-label="拡大表示を閉じる"></button><div class="lightbox-window" role="dialog" aria-modal="true" aria-labelledby="lightbox-title"><header><h2 id="lightbox-title">エンジン起動手順</h2><button type="button" data-close-lightbox aria-label="閉じる">×</button></header><div class="lightbox-scroll"><img id="lightbox-image" src="" alt=""></div></div></section>
 
   <footer><p>EXTINCTION ESCAPE PROJECT</p><span>STEP 03 / ENGINE STARTUP</span></footer>
-  <script src="progress.js?v=20260728-1"></script>
+  <script src="progress.js?v=20260825-2"></script>
   <script src="app.js"></script>
   <script src="lightbox-zoom.js?v=20260803-1"></script>
   <script src="screen5.js"></script>
